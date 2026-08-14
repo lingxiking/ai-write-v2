@@ -415,10 +415,12 @@ function resetAll() {
 // ============ API HELPERS ============
 const API_BASE = ''; // Same origin on Netlify
 
-// Detect if running locally (not on Netlify)
-const isLocal = !window.location.hostname.includes('netlify') && !window.location.hostname.includes('aiwrite');
-const LYRICS_API = isLocal ? 'https://api.deepseek.com/chat/completions' : '/api/lyrics';
-const MUSIC_API = '/api/music';
+// Always call APIs directly (works on any hosting)
+const isLocal = true;
+const LYRICS_API = 'https://api.deepseek.com/chat/completions';
+const MUSIC_API = '';
+// CORS proxy for MiniMax if needed
+const CORS_PROXY = 'https://corsproxy.io/?';
 
 // ============ LYRICS GENERATION (via Netlify Function or Direct) ============
 async function generateLyrics() {
@@ -476,22 +478,30 @@ async function generateLyrics() {
 副歌第一行
 副歌第二行`;
 
-      const resp = await fetch('https://api.deepseek.com/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${S.dsApiKey}`
-        },
-        body: JSON.stringify({
-          model: 'deepseek-chat',
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: userPrompt }
-          ],
-          temperature: 0.8,
-          max_tokens: 2000
-        })
+      const dsBody = JSON.stringify({
+        model: 'deepseek-chat',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt }
+        ],
+        temperature: 0.8,
+        max_tokens: 2000
       });
+      const dsHeaders = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${S.dsApiKey}`
+      };
+      
+      let resp;
+      try {
+        resp = await fetch('https://api.deepseek.com/chat/completions', {
+          method: 'POST', headers: dsHeaders, body: dsBody
+        });
+      } catch(e) {
+        resp = await fetch(CORS_PROXY + 'https://api.deepseek.com/chat/completions', {
+          method: 'POST', headers: dsHeaders, body: dsBody
+        });
+      }
       
       if (!resp.ok) {
         const err = await resp.text();
@@ -574,21 +584,30 @@ async function generateSongs() {
       updateProgress(10 + i * 5, `提交版本${versions[i].name}...`);
       
       if (isLocal) {
-        // Direct MiniMax call for local testing
-        const resp = await fetch('https://api.minimaxi.com/v1/music_generation', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${S.apiKey}`
-          },
-          body: JSON.stringify({
-            model: 'music-2.6',
-            prompt: versions[i].prompt,
-            lyrics: S.lyrics,
-            audio_setting: { sample_rate: 44100, bitrate: 256000, format: 'mp3' },
-            output_format: 'url'
-          })
+        // Direct MiniMax call, fallback to CORS proxy if blocked
+        const miniMaxBody = JSON.stringify({
+          model: 'music-2.6',
+          prompt: versions[i].prompt,
+          lyrics: S.lyrics,
+          audio_setting: { sample_rate: 44100, bitrate: 256000, format: 'mp3' },
+          output_format: 'url'
         });
+        const headers = {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${S.apiKey}`
+        };
+        
+        let resp;
+        try {
+          resp = await fetch('https://api.minimaxi.com/v1/music_generation', {
+            method: 'POST', headers: headers, body: miniMaxBody
+          });
+        } catch(corsErr) {
+          // CORS blocked, use proxy
+          resp = await fetch(CORS_PROXY + 'https://api.minimaxi.com/v1/music_generation', {
+            method: 'POST', headers: headers, body: miniMaxBody
+          });
+        }
         
         if (!resp.ok) {
           const errText = await resp.text().catch(() => '');
@@ -710,11 +729,15 @@ async function pollTask(taskId, label, onProgress) {
     
     let resp;
     if (isLocal) {
-      resp = await fetch(`https://api.minimaxi.com/v1/query/music_generation?task_id=${taskId}`, {
-        headers: { 'Authorization': `Bearer ${S.apiKey}` }
-      });
-    } else {
-      resp = await fetch(`/api/music?task_id=${taskId}`);
+      try {
+        resp = await fetch(`https://api.minimaxi.com/v1/query/music_generation?task_id=${taskId}`, {
+          headers: { 'Authorization': `Bearer ${S.apiKey}` }
+        });
+      } catch(e) {
+        resp = await fetch(CORS_PROXY + `https://api.minimaxi.com/v1/query/music_generation?task_id=${taskId}`, {
+          headers: { 'Authorization': `Bearer ${S.apiKey}` }
+        });
+      }
     }
     
     if (!resp.ok) {
