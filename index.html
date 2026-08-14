@@ -409,15 +409,22 @@ function dismissKeyboard() {
   const kbBar = document.getElementById('keyboardBar');
   if (kbBar) kbBar.classList.remove('show');
 }
+let _step3Transitioning = false;
 function goToStep3() {
-  // Dismiss keyboard first
-  document.activeElement.blur();
+  if (_step3Transitioning) return; // prevent double-tap
+  _step3Transitioning = true;
+  // Don't blur activeElement - let iOS Safari handle keyboard naturally
+  // to avoid viewport jump when keyboard closes
   const kbBar = document.getElementById('keyboardBar');
   if (kbBar) kbBar.classList.remove('show');
   S.lyrics = document.getElementById('lyricsEditor').value;
   S.songName = document.getElementById('songNameInput').value || S.topic;
-  if (!S.lyrics.trim()) { showStatus('歌词不能为空', 'error'); return; }
-  showStep(3);
+  if (!S.lyrics.trim()) { showStatus('歌词不能为空', 'error'); _step3Transitioning = false; return; }
+  // Small delay to let keyboard animation settle before DOM change
+  setTimeout(() => {
+    showStep(3);
+    _step3Transitioning = false;
+  }, 150);
 }
 function resetAll() {
   document.getElementById('topicInput').value = '';
