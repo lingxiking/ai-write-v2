@@ -159,7 +159,7 @@ textarea.input-field{min-height:200px;resize:vertical;font-family:inherit;line-h
     <div class="version-tag">V2</div>
     <h1>灵犀King·AI写歌</h1>
     <div class="subtitle">输入主题，AI为你创作歌词并谱曲演唱</div>
-    <div class="slogan">突破阻力，助力梦想</div>
+    <div class="slogan">突破阻力 助力梦想</div>
   </div>
 
   <div id="statusBar" class="status-bar hidden"></div>
@@ -614,34 +614,37 @@ async function generateSongs() {
           throw new Error(`MiniMax API错误 ${resp.status}: ${errText.substring(0, 150)}`);
         }
         
-        const data = await resp.json();
-        console.log('[MiniMax Response]', JSON.stringify(data));
+        const rawText = await resp.text();
+        console.log('[MiniMax Raw Response]', rawText.substring(0, 500));
         
-        // MiniMax response: { base_resp: {status_code, status_msg}, data: { task_id } }
-        let url = null, taskId = null;
-        
-        // Try data.data.task_id (new format)
-        if (data.data && data.data.task_id) taskId = data.data.task_id;
-        if (data.data && data.data.audio_url) url = data.data.audio_url;
-        if (data.data && data.data.url) url = data.data.url;
-        
-        // Try data.data[0] (array format)
-        if (!taskId && !url && data.data && Array.isArray(data.data) && data.data.length > 0) {
-          url = data.data[0].url || data.data[0].audio_url;
-          taskId = data.data[0].task_id;
+        let data;
+        try { data = JSON.parse(rawText); } catch(pe) {
+          throw new Error('MiniMax响应非JSON: ' + rawText.substring(0, 200));
         }
         
-        // Try top-level fields
-        if (!taskId) taskId = data.task_id;
-        if (!url) url = data.url || data.audio_url;
+        // Deep search for task_id and url in response
+        let url = null, taskId = null;
+        
+        // Helper: recursively find key in object
+        function findKey(obj, key) {
+          if (!obj || typeof obj !== 'object') return null;
+          if (obj[key] !== undefined && obj[key] !== null && obj[key] !== '') return obj[key];
+          for (var k in obj) {
+            var found = findKey(obj[k], key);
+            if (found !== null) return found;
+          }
+          return null;
+        }
+        
+        taskId = findKey(data, 'task_id');
+        url = findKey(data, 'audio_url') || findKey(data, 'url');
         
         if (url) {
           tasks.push({ direct: true, url: url, label: versions[i].name });
         } else if (taskId) {
           tasks.push({ direct: false, task_id: taskId, label: versions[i].name });
         } else {
-          const errMsg = (data.base_resp && data.base_resp.status_msg) || JSON.stringify(data).substring(0, 200);
-          throw new Error(`MiniMax返回异常(无task_id/URL): ${errMsg}`);
+          throw new Error('MiniMax返回异常(无task_id/URL): ' + rawText.substring(0, 300));
         }
         
       } else {
