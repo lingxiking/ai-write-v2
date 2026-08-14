@@ -636,7 +636,7 @@ async function generateSongs() {
   const styleArrangement = {
     pop: ['流行编曲,朗朗上口的旋律,节奏感强,副歌记忆点强', '流行编曲,层次递进,弦乐铺底,情绪饱满,高潮爆发'],
     rock: ['摇滚编曲,电吉他riff驱动,鼓点有力,副歌嘶吼感,现场氛围', '另类摇滚,氛围感前奏渐入,失真吉他叠加,爆发力强'],
-    folk: ['极简民谣,只有一把木吉他弹唱,赵雷风格,朴素温暖,像在深夜讲故事,不要花哨编曲,不要弦乐', '独立民谣,指弹吉他为主,宋冬野风格,低沉嗓音,情感克制内敛,间奏保持安静,不加重编曲'],
+    folk: ['民谣编曲,木吉他弹唱为主,口琴穿插,赵照风格,朴素温暖,像在深夜讲故事,间奏口琴solo,不要花哨编曲,不要弦乐', '独立民谣,木吉他指弹,口琴呼应,宋冬野风格,低沉嗓音,情感克制内敛,间奏口琴或吉他solo,编曲简洁有层次'],
     electronic: ['电子编曲,合成器铺底,节拍律动强,drops设计感,氛围感', '电子编曲,琶音器开场,渐进式build-up,副歌drop爆发'],
     rnb: ['R&B编曲,律动鼓点,贝斯线条流畅,转音空间大,深情演绎', 'Neo-Soul风格,钢琴和弦,慵懒律动,和声丰富,副歌情感爆发'],
     country: ['乡村编曲,木吉他扫弦,班卓琴点缀,叙事感强,阳光温暖', '乡村民谣,口琴开场,吉他伴奏,像公路旅行般自由,副歌旋律优美'],
@@ -924,6 +924,8 @@ function fallbackCopy(text) {
 
 function displayResults(results, versions) {
   const panel = document.getElementById('resultPanel');
+  // Hide step3 card to avoid duplicate UI
+  document.getElementById('step3Card').classList.add('hidden');
   let hasSuccess = false, hasError = false;
   
   results.forEach((r, i) => {
