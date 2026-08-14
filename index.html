@@ -215,6 +215,11 @@ textarea.input-field{min-height:200px;resize:vertical;font-family:inherit;line-h
     <p style="font-size:13px;color:var(--text-dim);margin-bottom:12px">修改歌词直到满意，再进入谱曲环节。保留结构标签获得更好的编排效果。</p>
     
     <div class="input-group">
+      <label>🎵 歌曲名称</label>
+      <input class="input-field" id="songNameInput" type="text" placeholder="AI自动生成的歌名" maxlength="80" style="font-size:17px;font-weight:600;text-align:center;margin-bottom:16px" />
+    </div>
+
+    <div class="input-group">
       <div class="textarea-wrap">
         <textarea class="input-field" id="lyricsEditor"></textarea>
         <div class="dismiss-kbd-btn" onclick="dismissKeyboard()">▼ 收起键盘</div>
@@ -316,7 +321,8 @@ const S = {
   stylePrompt: '流行,优美旋律,抒情,朗朗上口',
   voice: 'male',
   lyrics: '',
-  topic: ''
+  topic: '',
+  songName: ''
 };
 
 // Init
@@ -409,6 +415,7 @@ function goToStep3() {
   const kbBar = document.getElementById('keyboardBar');
   if (kbBar) kbBar.classList.remove('show');
   S.lyrics = document.getElementById('lyricsEditor').value;
+  S.songName = document.getElementById('songNameInput').value || S.topic;
   if (!S.lyrics.trim()) { showStatus('歌词不能为空', 'error'); return; }
   showStep(3);
 }
@@ -542,10 +549,46 @@ async function generateLyrics() {
     document.getElementById('lyricsEditor').value = lyrics;
     S.lyrics = lyrics;
     
+    // Auto-generate song name via DeepSeek
+    let generatedName = S.topic;
+    try {
+      updateProgress(95, '正在起歌名...');
+      const nameBody = JSON.stringify({
+        model: 'deepseek-chat',
+        messages: [
+          { role: 'system', content: '你是一位资深音乐制作人，擅长给歌曲起名。歌名要求：2-6个字，有意境，有记忆点，不要俗气。只输出歌名，不要解释。' },
+          { role: 'user', content: `歌曲主题：${topic}，风格：${styleMap[S.style] || '流行'}\n歌词节选：\n${lyrics.substring(0, 200)}\n\n请给这首歌起一个好听的名字：` }
+        ],
+        max_tokens: 20,
+        temperature: 0.8
+      });
+      const nameHeaders = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${S.dsApiKey}`
+      };
+      let nameResp;
+      try {
+        nameResp = await fetch('https://api.deepseek.com/chat/completions', {
+          method: 'POST', headers: nameHeaders, body: nameBody
+        });
+      } catch(e) {
+        nameResp = await fetch(CORS_PROXY + 'https://api.deepseek.com/chat/completions', {
+          method: 'POST', headers: nameHeaders, body: nameBody
+        });
+      }
+      if (nameResp.ok) {
+        const nameData = await nameResp.json();
+        generatedName = nameData.choices[0].message.content.trim().replace(/^["'《]|[》"']$/g, '');
+      }
+    } catch(e) { console.warn('歌名生成失败:', e); }
+    
+    S.songName = generatedName;
+    
     setTimeout(() => {
       hideLoading();
       showStep(2);
-      showStatus('歌词已生成，可以编辑修改', 'success');
+      document.getElementById('songNameInput').value = generatedName;
+      showStatus('歌词已生成，可以修改歌名和歌词', 'success');
     }, 500);
     
   } catch (err) {
@@ -573,7 +616,7 @@ async function generateSongs() {
   const styleVoice = {
     pop: S.voice === 'male' ? '流行男歌手,清亮嗓音,旋律感强,副歌爆发力' : '流行女歌手,甜美嗓音,高音清亮,情感细腻',
     rock: S.voice === 'male' ? '摇滚男歌手,嘶吼有力,沙哑烟嗓,现场感强' : '摇滚女歌手,高亢有力,爆发力强,略带沙哑',
-    folk: S.voice === 'male' ? '民谣男歌手,轻声吟唱,温暖低沉,像在讲故事,不炫技' : '民谣女歌手,清澈嗓音,轻声细语,像在耳边说话,质朴自然',
+    folk: S.voice === 'male' ? '民谣男歌手,朴素吟唱,嗓音低沉温暖,像在深夜自弹自唱,禁止转音,禁止尾音炫技,句尾自然收住不拖长' : '民谣女歌手,清澈嗓音,轻声细语,像在耳边说悄悄话,禁止转音,禁止尾音花哨,质朴自然不加修饰',
     electronic: S.voice === 'male' ? '电子男歌手,迷幻嗓音,效果器处理,未来感' : '电子女歌手,空灵嗓音,飘渺感,带效果器',
     rnb: S.voice === 'male' ? 'R&B男歌手,转音丝滑,律动感强,深情低吟' : 'R&B女歌手,转音丰富,磁性嗓音,性感慵懒',
     country: S.voice === 'male' ? '乡村男歌手,质朴嗓音,叙事感强,阳光温暖' : '乡村女歌手,清新嗓音,甜美自然,像阳光般温暖',
@@ -593,7 +636,7 @@ async function generateSongs() {
   const styleArrangement = {
     pop: ['流行编曲,朗朗上口的旋律,节奏感强,副歌记忆点强', '流行编曲,层次递进,弦乐铺底,情绪饱满,高潮爆发'],
     rock: ['摇滚编曲,电吉他riff驱动,鼓点有力,副歌嘶吼感,现场氛围', '另类摇滚,氛围感前奏渐入,失真吉他叠加,爆发力强'],
-    folk: ['民谣编曲,木吉他弹唱为主,口琴点缀,温暖质朴,像在讲故事', '独立民谣,指弹吉他,轻声吟唱,间奏加弦乐,情感细腻层层递进'],
+    folk: ['极简民谣,只有一把木吉他弹唱,赵雷风格,朴素温暖,像在深夜讲故事,不要花哨编曲,不要弦乐', '独立民谣,指弹吉他为主,宋冬野风格,低沉嗓音,情感克制内敛,间奏保持安静,不加重编曲'],
     electronic: ['电子编曲,合成器铺底,节拍律动强,drops设计感,氛围感', '电子编曲,琶音器开场,渐进式build-up,副歌drop爆发'],
     rnb: ['R&B编曲,律动鼓点,贝斯线条流畅,转音空间大,深情演绎', 'Neo-Soul风格,钢琴和弦,慵懒律动,和声丰富,副歌情感爆发'],
     country: ['乡村编曲,木吉他扫弦,班卓琴点缀,叙事感强,阳光温暖', '乡村民谣,口琴开场,吉他伴奏,像公路旅行般自由,副歌旋律优美'],
@@ -907,7 +950,7 @@ function displayResults(results, versions) {
       label.textContent = `版本 ${r.label}`;
       audio.src = r.url;
       download.href = r.url;
-      download.download = `${S.topic || '灵犀King'}_V${r.label}.mp3`;
+      download.download = `${displayName}_V${r.label}.mp3`;
     }
   });
   
@@ -916,9 +959,10 @@ function displayResults(results, versions) {
   
   // Show song title
   const titleDisplay = document.getElementById('songTitleDisplay');
-  if (S.topic) {
+  const displayName = S.songName || S.topic || '灵犀King';
+  if (displayName) {
     titleDisplay.style.display = 'block';
-    titleDisplay.querySelector('span').textContent = `《${S.topic}》`;
+    titleDisplay.querySelector('span').textContent = `《${displayName}》`;
   }
   
   // Show lyrics download
@@ -944,7 +988,7 @@ async function retryQuery(taskId, label) {
     labelEl.textContent = `版本 ${result.label}`;
     audio.src = result.url;
     download.href = result.url;
-    download.download = `${S.topic || '灵犀King'}_V${result.label}.mp3`;
+    download.download = `${S.songName || S.topic || '灵犀King'}_V${result.label}.mp3`;
     // Remove retry button
     const retryBtn = audio.parentElement.querySelector('button');
     if (retryBtn) retryBtn.remove();
