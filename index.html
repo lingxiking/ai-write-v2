@@ -633,7 +633,7 @@ async function generateSongs() {
         }
         
         taskId = findKey(data, 'task_id');
-        url = findKey(data, 'audio_url') || findKey(data, 'url');
+        url = findKey(data, 'audio_url') || findKey(data, 'audio') || findKey(data, 'url');
         
         if (url) {
           tasks.push({ direct: true, url: url, label: versions[i].name });
