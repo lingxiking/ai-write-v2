@@ -630,7 +630,7 @@ async function generateSongs() {
       if (isLocal) {
         // Direct MiniMax call, fallback to CORS proxy if blocked
         const miniMaxBody = JSON.stringify({
-          model: 'music-2.6',
+          model: 'music-3.0-free',
           prompt: versions[i].prompt,
           lyrics: S.lyrics,
           audio_setting: { sample_rate: 44100, bitrate: 256000, format: 'mp3' },
