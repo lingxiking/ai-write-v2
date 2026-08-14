@@ -263,6 +263,9 @@ textarea.input-field{min-height:200px;resize:vertical;font-family:inherit;line-h
 
   <!-- Results -->
   <div class="result-panel" id="resultPanel">
+    <div id="songTitleDisplay" style="text-align:center;margin-bottom:12px;display:none">
+      <span style="font-size:18px;font-weight:600;background:linear-gradient(135deg,#e8e0ff,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text"></span>
+    </div>
     <div class="result-card fade-in">
       <div class="label">版本 A</div>
       <audio id="audioA" controls></audio>
@@ -910,6 +913,13 @@ function displayResults(results, versions) {
   
   panel.classList.add('show');
   document.getElementById('regenRow').classList.remove('hidden');
+  
+  // Show song title
+  const titleDisplay = document.getElementById('songTitleDisplay');
+  if (S.topic) {
+    titleDisplay.style.display = 'block';
+    titleDisplay.querySelector('span').textContent = `《${S.topic}》`;
+  }
   
   // Show lyrics download
   const lyricsCard = document.getElementById('lyricsDownloadCard');
