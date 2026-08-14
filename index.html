@@ -275,6 +275,12 @@ textarea.input-field{min-height:200px;resize:vertical;font-family:inherit;line-h
     </div>
   </div>
 
+  <!-- Lyrics Download -->
+  <div class="result-card fade-in hidden" id="lyricsDownloadCard" style="text-align:center;margin-top:8px">
+    <div class="label" style="margin-bottom:8px">📝 歌词</div>
+    <a class="download-btn" id="downloadLyrics" download="歌词.txt" style="display:inline-block">下载歌词</a>
+  </div>
+
   <!-- Regenerate -->
   <div class="btn-row hidden" id="regenRow">
     <button class="btn btn-secondary" onclick="generateSongs()">🔄 重新生成</button>
@@ -552,6 +558,7 @@ async function generateSongs() {
   btn.disabled = true;
   document.getElementById('resultPanel').classList.remove('show');
   document.getElementById('regenRow').classList.add('hidden');
+  document.getElementById('lyricsDownloadCard').classList.add('hidden');
   
   showLoading('正在谱曲编曲...');
   
@@ -559,15 +566,36 @@ async function generateSongs() {
     ? 'male vocalist, warm and powerful voice, emotional depth' 
     : 'female vocalist, clear and graceful voice, ethereal tone';
   
+  // Style-specific arrangement hints (Chinese for better MiniMax understanding)
+  const styleArrangement = {
+    pop: ['流行编曲,朗朗上口的旋律,节奏感强,副歌记忆点强', '流行编曲,层次递进,弦乐铺底,情绪饱满,高潮爆发'],
+    rock: ['摇滚编曲,电吉他riff驱动,鼓点有力,副歌嘶吼感,现场氛围', '另类摇滚,氛围感前奏渐入,失真吉他叠加,爆发力强'],
+    folk: ['民谣编曲,木吉他弹唱为主,口琴点缀,温暖质朴,像在讲故事', '独立民谣,指弹吉他,轻声吟唱,间奏加弦乐,情感细腻层层递进'],
+    electronic: ['电子编曲,合成器铺底,节拍律动强,drops设计感,氛围感', '电子编曲,琶音器开场,渐进式build-up,副歌drop爆发'],
+    rnb: ['R&B编曲,律动鼓点,贝斯线条流畅,转音空间大,深情演绎', 'Neo-Soul风格,钢琴和弦,慵懒律动,和声丰富,副歌情感爆发'],
+    country: ['乡村编曲,木吉他扫弦,班卓琴点缀,叙事感强,阳光温暖', '乡村民谣,口琴开场,吉他伴奏,像公路旅行般自由,副歌旋律优美'],
+    ballad: ['抒情编曲,钢琴伴奏为主,弦乐烘托,情绪层层递进,感人至深', '叙事抒情,吉他开场渐入弦乐,副歌情感爆发,催人泪下'],
+    blues: ['蓝调编曲,电吉他solo,沙哑嗓音,12小节进行,忧郁深情', '蓝调摇滚,滑音吉他,口琴呼应,节奏摇摆,粗犷有力'],
+    jazz: ['爵士编曲,钢琴即兴,walking bass,swing节奏,慵懒优雅', 'Bossa Nova风格,尼龙弦吉他,轻柔打击乐,萨克斯间奏,微醺感'],
+    hiphop: ['说唱编曲,808鼓机,bass沉重,flow有律动,副歌旋律洗脑', 'Trap风格,hi-hat细碎,bass凶猛,ad-lib点缀,副歌hook洗脑'],
+    chinese: ['中国风编曲,琵琶古筝,竹笛悠扬,五声音阶,诗意婉转', '古风编曲,二胡开场,古琴铺底,副歌加入鼓点,大气磅礴'],
+    punk: ['朋克编曲,快速强力和弦,鼓点密集,喊唱式副歌,叛逆直接', '流行朋克,吉他riff洗脑,节奏明快,副歌大合唱感'],
+    metal: ['金属编曲,失真riff,双踩鼓点,嘶吼与清嗓交替,史诗感', '力量金属,吉他速弹,交响元素,副歌旋律壮阔,气势磅礴'],
+    indie: ['独立编曲,清新吉他,简约制作,人声突出,自然不做作', '梦幻流行,混响吉他,氛围合成器,人声飘渺,空间感强'],
+    reggae: ['雷鬼编曲,反拍吉他,贝斯厚重,律动轻松,阳光慵懒', 'Dub风格,回声效果,skank吉他,低音bassline,放松惬意']
+  };
+  
+  const arr = styleArrangement[S.style] || styleArrangement.pop;
+  
   // Two versions with different arrangement approaches
   const versions = [
     {
       name: 'A',
-      prompt: `${S.stylePrompt}, ${voiceDesc}, catchy memorable intro hook, powerful melodic chorus with sing-along quality, dynamic arrangement, professional production, emotional resonance, smooth vocal delivery with natural phrasing, high quality mastering`
+      prompt: `${S.stylePrompt}, ${voiceDesc}, ${arr[0]}, 专业制作水准,情感共鸣,高质量母带`
     },
     {
       name: 'B',
-      prompt: `${S.stylePrompt}, ${voiceDesc}, creative arrangement, atmospheric intro building to explosive chorus, rich harmonies, intricate instrumental layers, cinematic production quality, heartfelt vocal performance, polished mix`
+      prompt: `${S.stylePrompt}, ${voiceDesc}, ${arr[1]}, 专业制作水准,情感共鸣,高质量母带`
     }
   ];
   
@@ -798,6 +826,15 @@ function displayResults(results, versions) {
   
   panel.classList.add('show');
   document.getElementById('regenRow').classList.remove('hidden');
+  
+  // Show lyrics download
+  const lyricsCard = document.getElementById('lyricsDownloadCard');
+  const lyricsDownload = document.getElementById('downloadLyrics');
+  const topic = S.topic || '灵犀King';
+  const lyricsBlob = new Blob([S.lyrics], { type: 'text/plain;charset=utf-8' });
+  lyricsDownload.href = URL.createObjectURL(lyricsBlob);
+  lyricsDownload.download = `${topic}_歌词.txt`;
+  lyricsCard.classList.remove('hidden');
 }
 
 async function retryQuery(taskId, label) {
