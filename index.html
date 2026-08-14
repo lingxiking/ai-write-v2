@@ -562,9 +562,25 @@ async function generateSongs() {
   
   showLoading('正在谱曲编曲...');
   
-  const voiceDesc = S.voice === 'male' 
-    ? 'male vocalist, warm and powerful voice, emotional depth' 
-    : 'female vocalist, clear and graceful voice, ethereal tone';
+  // Style-specific vocal descriptions (key to matching overall feel)
+  const styleVoice = {
+    pop: S.voice === 'male' ? '流行男歌手,清亮嗓音,旋律感强,副歌爆发力' : '流行女歌手,甜美嗓音,高音清亮,情感细腻',
+    rock: S.voice === 'male' ? '摇滚男歌手,嘶吼有力,沙哑烟嗓,现场感强' : '摇滚女歌手,高亢有力,爆发力强,略带沙哑',
+    folk: S.voice === 'male' ? '民谣男歌手,轻声吟唱,温暖低沉,像在讲故事,不炫技' : '民谣女歌手,清澈嗓音,轻声细语,像在耳边说话,质朴自然',
+    electronic: S.voice === 'male' ? '电子男歌手,迷幻嗓音,效果器处理,未来感' : '电子女歌手,空灵嗓音,飘渺感,带效果器',
+    rnb: S.voice === 'male' ? 'R&B男歌手,转音丝滑,律动感强,深情低吟' : 'R&B女歌手,转音丰富,磁性嗓音,性感慵懒',
+    country: S.voice === 'male' ? '乡村男歌手,质朴嗓音,叙事感强,阳光温暖' : '乡村女歌手,清新嗓音,甜美自然,像阳光般温暖',
+    ballad: S.voice === 'male' ? '抒情男歌手,深情低吟,情绪饱满,催泪' : '抒情女歌手,细腻动人,情绪层层递进,催泪',
+    blues: S.voice === 'male' ? '蓝调男歌手,沙哑沧桑,忧郁深情,带沧桑感' : '蓝调女歌手,磁性沙哑,慵懒深情,带沧桑感',
+    jazz: S.voice === 'male' ? '爵士男歌手,慵懒嗓音,摇摆律动,微醺感' : '爵士女歌手,慵懒性感,低回婉转,微醺感',
+    hiphop: S.voice === 'male' ? '说唱男歌手,flow流畅,节奏感强,副歌旋律洗脑' : '说唱女歌手,flow利落,态度鲜明,副歌甜美',
+    chinese: S.voice === 'male' ? '古风男歌手,儒雅嗓音,诗意吟唱,温润如玉' : '古风女歌手,婉转嗓音,空灵飘逸,诗意盎然',
+    punk: S.voice === 'male' ? '朋克男歌手,嘶喊直接,叛逆有力,快节奏' : '朋克女歌手,嘶喊有力,叛逆直接,快节奏',
+    metal: S.voice === 'male' ? '金属男歌手,嘶吼与清嗓交替,力量爆发,史诗感' : '金属女歌手,高亢嘶吼,力量感强,歌剧式',
+    indie: S.voice === 'male' ? '独立男歌手,慵懒自然,不做作,人声突出' : '独立女歌手,清新自然,飘渺感,人声突出',
+    reggae: S.voice === 'male' ? '雷鬼男歌手,慵懒律动,阳光轻松,带牙买加腔' : '雷鬼女歌手,慵懒甜美,轻松惬意,律动感强'
+  };
+  const voiceDesc = styleVoice[S.style] || styleVoice.pop;
   
   // Style-specific arrangement hints (Chinese for better MiniMax understanding)
   const styleArrangement = {
