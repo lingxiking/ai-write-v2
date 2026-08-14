@@ -325,6 +325,63 @@ const S = {
   songName: ''
 };
 
+// ============ STATE PERSISTENCE ============
+function saveState(step) {
+  try {
+    const state = {
+      step: step || 1,
+      topic: S.topic,
+      style: S.style,
+      stylePrompt: S.stylePrompt,
+      voice: S.voice,
+      lyrics: S.lyrics,
+      songName: S.songName,
+      ts: Date.now()
+    };
+    localStorage.setItem('aiwrite_state', JSON.stringify(state));
+  } catch(e) {}
+}
+function restoreState() {
+  try {
+    const raw = localStorage.getItem('aiwrite_state');
+    if (!raw) return;
+    const state = JSON.parse(raw);
+    // Only restore if less than 30 minutes old
+    if (Date.now() - state.ts > 30 * 60 * 1000) {
+      localStorage.removeItem('aiwrite_state');
+      return;
+    }
+    S.topic = state.topic || '';
+    S.style = state.style || 'pop';
+    S.stylePrompt = state.stylePrompt || '流行,优美旋律,抒情,朗朗上口';
+    S.voice = state.voice || 'male';
+    S.lyrics = state.lyrics || '';
+    S.songName = state.songName || '';
+    
+    // Restore UI
+    if (S.topic) document.getElementById('topicInput').value = S.topic;
+    // Restore style tag
+    document.querySelectorAll('.style-tag').forEach(t => {
+      t.classList.toggle('active', t.dataset.style === S.style);
+    });
+    // Restore voice
+    document.querySelectorAll('.voice-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.voice === S.voice);
+    });
+    
+    // Navigate to saved step
+    if (state.step === 2 && S.lyrics) {
+      document.getElementById('lyricsEditor').value = S.lyrics;
+      document.getElementById('songNameInput').value = S.songName || '';
+      showStep(2);
+    } else if (state.step === 3 && S.lyrics) {
+      document.getElementById('lyricsEditor').value = S.lyrics;
+      document.getElementById('songNameInput').value = S.songName || '';
+      showStep(3);
+    }
+  } catch(e) { console.warn('restoreState error:', e); }
+}
+
 // Init
 document.getElementById('apiKey').value = S.apiKey;
 document.getElementById('dsApiKey').value = S.dsApiKey;
@@ -479,27 +536,47 @@ async function generateLyrics() {
 5. 有情感共鸣——写出普通人能感同身受的画面和情绪
 6. 避免陈词滥调和过于文艺的表达——真诚、直接、有温度`;
 
-      const userPrompt = `请为以下主题创作一首完整的${styleMap[S.style] || '流行'}风格歌曲歌词。
+      const userPrompt = `请为以下主题创作一首完整的${styleMap[S.style] || '流行'}风格歌曲歌词，目标时长4分钟左右（标准流行歌曲长度）。
 
 主题：${topic}
 
 要求：
 - 必须使用结构标签标注歌曲段落
-- 包含：[Intro]（可选）、[Verse]（至少2段）、[Pre Chorus]（可选）、[Chorus]（至少1段，建议2段重复）、[Bridge]（可选）、[Outro]（可选）
+- 结构要求（确保歌曲达到4分钟）：
+  [Intro]（4行纯音乐提示或哼唱）
+  [Verse 1]（4-6行，铺陈画面）
+  [Pre Chorus]（2-4行，情绪递进）
+  [Chorus]（4-6行，记忆点最强，重复2次）
+  [Verse 2]（4-6行，推进叙事，不要重复第一段）
+  [Chorus]（重复）
+  [Bridge]（2-4行，情感转折或升华）
+  [Chorus]（最后一次副歌，可以升调或变奏）
+  [Outro]（2-4行，余韵收尾）
 - 如果有特别洗脑的句子，用[Hook]标签标记
-- 歌词长度适中，每段4-8行
+- 每段4-8行，总歌词量要够撑起4分钟
 - 语言自然，适合演唱，避免生僻字和拗口表达
 - 副歌要有记忆点，让人听一遍就能跟着哼
 - 主题要有深度，不要停留在表面描写
 
 只输出歌词内容，不要解释。格式示例：
+[Intro]
+（轻柔吉他前奏）
+
 [Verse]
 歌词第一行
 歌词第二行
+歌词第三行
+歌词第四行
+
+[Pre Chorus]
+过渡句第一行
+过渡句第二行
 
 [Chorus]
 副歌第一行
-副歌第二行`;
+副歌第二行
+副歌第三行
+副歌第四行`;
 
       const dsBody = JSON.stringify({
         model: 'deepseek-chat',
@@ -664,11 +741,11 @@ async function generateSongs() {
   const versions = [
     {
       name: 'A',
-      prompt: `${S.stylePrompt}, ${voiceDesc}, ${arr[0]}, 专业制作水准,情感共鸣,高质量母带`
+      prompt: `${S.stylePrompt}, ${voiceDesc}, ${arr[0]}, 完整歌曲结构,4分钟左右,专业制作水准,情感共鸣,高质量母带`
     },
     {
       name: 'B',
-      prompt: `${S.stylePrompt}, ${voiceDesc}, ${arr[1]}, 专业制作水准,情感共鸣,高质量母带`
+      prompt: `${S.stylePrompt}, ${voiceDesc}, ${arr[1]}, 完整歌曲结构,4分钟左右,专业制作水准,情感共鸣,高质量母带`
     }
   ];
   
