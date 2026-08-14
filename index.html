@@ -621,16 +621,36 @@ async function generateSongs() {
           'Authorization': `Bearer ${S.apiKey}`
         };
         
-        let resp;
-        try {
-          resp = await fetch('https://api.minimaxi.com/v1/music_generation', {
-            method: 'POST', headers: headers, body: miniMaxBody
-          });
-        } catch(corsErr) {
-          // CORS blocked, use proxy
-          resp = await fetch(CORS_PROXY + 'https://api.minimaxi.com/v1/music_generation', {
-            method: 'POST', headers: headers, body: miniMaxBody
-          });
+        let resp = null;
+        const MAX_RETRIES = 2;
+        for (let retry = 0; retry <= MAX_RETRIES; retry++) {
+          if (retry > 0) {
+            console.log(`[MiniMax] Retry ${retry}/${MAX_RETRIES} for version ${versions[i].name}...`);
+            updateProgress(10 + i * 5, `版本${versions[i].name} 重试中(${retry}/${MAX_RETRIES})...`);
+            await new Promise(r => setTimeout(r, 3000 * retry)); // wait 3s, then 6s
+          }
+          try {
+            resp = await fetch('https://api.minimaxi.com/v1/music_generation', {
+              method: 'POST', headers: headers, body: miniMaxBody
+            });
+          } catch(corsErr) {
+            // CORS blocked, use proxy
+            try {
+              resp = await fetch(CORS_PROXY + 'https://api.minimaxi.com/v1/music_generation', {
+                method: 'POST', headers: headers, body: miniMaxBody
+              });
+            } catch(proxyErr) {
+              console.error('[MiniMax] Proxy error:', proxyErr);
+              resp = null;
+              continue;
+            }
+          }
+          // If response is OK or not a server error (5xx), break retry loop
+          if (resp && (resp.ok || resp.status < 500)) break;
+        }
+        
+        if (!resp) {
+          throw new Error(`MiniMax连接失败: 网络请求${MAX_RETRIES + 1}次均失败，请检查网络后重试`);
         }
         
         if (!resp.ok) {
