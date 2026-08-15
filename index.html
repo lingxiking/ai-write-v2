@@ -1017,7 +1017,55 @@ function shareLyrics() {
   if (sheet) sheet.classList.add('hidden');
   const topic = S.topic || '灵犀King·AI写歌';
   const lyrics = S.lyrics || '';
-  const cw = 1080, ch = 1920;
+
+  // ---------- 1. 先测量歌词实际占用高度, 动态决定 canvas 高度, 保证完整渲染不截断 ----------
+  const cw = 1080;
+  const measure = document.createElement('canvas').getContext('2d');
+  const fBody = '42px -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif';
+  const fSection = 'bold 40px -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif';
+  const maxWidth = cw - 160;
+  const lineHeightBody = 68;
+  const lineHeightSection = 80;
+  const sectionRe = /^\s*[\[【](?:verse|chorus|bridge|intro|outro|pre-chorus|hook|副歌|主歌|桥段|前奏|尾奏|间奏)[^\]】]*[\]】]\s*$/i;
+
+  function wrapLine(ctx, line, font) {
+    ctx.font = font;
+    if (!line) return [{ text: '', section: false }];
+    const out = [];
+    if (sectionRe.test(line)) {
+      out.push({ text: line.replace(/^\s*[\[【|]\s*|\s*[\]】|]\s*$/g, ''), section: true });
+      return out;
+    }
+    let cur = '';
+    for (const c of line) {
+      const test = cur + c;
+      if (ctx.measureText(test).width > maxWidth) { out.push({ text: cur, section: false }); cur = c; }
+      else cur = test;
+    }
+    if (cur) out.push({ text: cur, section: false });
+    return out;
+  }
+
+  const rawLines = lyrics.split('\n');
+  const wrapped = [];
+  for (const raw of rawLines) {
+    const isSection = sectionRe.test(raw);
+    const parts = wrapLine(measure, raw, isSection ? fSection : fBody);
+    for (const p of parts) wrapped.push(p);
+  }
+  let lyricsHeight = 40; // 顶部额外留白
+  for (const w of wrapped) {
+    lyricsHeight += w.section ? lineHeightSection : lineHeightBody;
+  }
+  lyricsHeight += 40; // 底部额外留白
+
+  // 顶部固定区 (品牌+副标题+分隔线+标题) ≈ 440; 底部 footer ≈ 280
+  const topFixed = 440;
+  const footerH = 290;
+  const minH = 1920;
+  const ch = Math.max(minH, topFixed + lyricsHeight + footerH);
+
+  // ---------- 2. 真正绘制 ----------
   const canvas = document.createElement('canvas');
   canvas.width = cw; canvas.height = ch;
   const ctx = canvas.getContext('2d');
@@ -1027,7 +1075,7 @@ function shareLyrics() {
   grad.addColorStop(1, '#0a0a0f');
   ctx.fillStyle = grad; ctx.fillRect(0, 0, cw, ch);
   // 装饰光斑
-  const rg = ctx.createRadialGradient(cw*0.8, ch*0.15, 0, cw*0.8, ch*0.15, 500);
+  const rg = ctx.createRadialGradient(cw*0.8, 200, 0, cw*0.8, 200, 500);
   rg.addColorStop(0, 'rgba(139,92,246,0.35)');
   rg.addColorStop(1, 'rgba(139,92,246,0)');
   ctx.fillStyle = rg; ctx.fillRect(0, 0, cw, ch);
@@ -1035,77 +1083,68 @@ function shareLyrics() {
   rg2.addColorStop(0, 'rgba(6,182,212,0.25)');
   rg2.addColorStop(1, 'rgba(6,182,212,0)');
   ctx.fillStyle = rg2; ctx.fillRect(0, 0, cw, ch);
-  // 顶部品牌区 (压缩高度, 给歌词更多空间)
+
+  // 顶部品牌区
   ctx.fillStyle = '#8b5cf6';
   ctx.font = 'bold 52px -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif';
   ctx.fillText('灵犀King · AI写歌', 80, 150);
   ctx.fillStyle = '#94a3b8';
   ctx.font = '28px -apple-system, "PingFang SC", sans-serif';
   ctx.fillText('AI 为你创作专属原创歌曲', 80, 198);
-  // 分隔线
   ctx.strokeStyle = 'rgba(139,92,246,0.4)'; ctx.lineWidth = 2;
   ctx.beginPath(); ctx.moveTo(80, 240); ctx.lineTo(cw-80, 240); ctx.stroke();
+
   // 标题
   ctx.fillStyle = '#fff';
   ctx.font = 'bold 84px -apple-system, "PingFang SC", sans-serif';
   ctx.fillText(topic, 80, 370);
-  // 歌词
-  ctx.fillStyle = '#e2e8f0';
-  ctx.font = '44px -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif';
-  const maxWidth = cw - 160;
-  const lineHeight = 72;
-  const lines = lyrics.split('\n');
-  let y = 490;
-  function wrapLine(line) {
-    if (!line) return [''];
-    const out = []; let cur = '';
-    for (const ch of line) {
-      const test = cur + ch;
-      if (ctx.measureText(test).width > maxWidth) { out.push(cur); cur = ch; }
-      else cur = test;
-    }
-    if (cur) out.push(cur);
-    return out;
-  }
-  for (const raw of lines) {
-    if (y > ch - 360) break;
-    const wrapped = wrapLine(raw);
-    for (const wl of wrapped) {
-      if (y > ch - 360) break;
-      ctx.fillText(wl, 80, y);
-      y += lineHeight;
+
+  // 歌词逐行绘制
+  let y = 470;
+  for (const w of wrapped) {
+    if (w.section) {
+      // 章节标题: 紫色加粗, 带左侧小色条
+      ctx.fillStyle = '#a855f7';
+      ctx.font = fSection;
+      ctx.fillRect(80, y - 44, 8, 48);
+      ctx.fillText(w.text.toUpperCase(), 104, y);
+      y += lineHeightSection;
+    } else {
+      ctx.fillStyle = '#e2e8f0';
+      ctx.font = fBody;
+      ctx.fillText(w.text, 80, y);
+      y += lineHeightBody;
     }
   }
-  // 底部信息 (优化引导语)
+
+  // 底部信息 (固定在 canvas 最底部)
   const footerY = ch - 200;
-  // 分隔线
   ctx.strokeStyle = 'rgba(139,92,246,0.25)'; ctx.lineWidth = 1;
   ctx.beginPath(); ctx.moveTo(80, footerY - 30); ctx.lineTo(cw-80, footerY - 30); ctx.stroke();
-  // 小箭头/链接图标
   ctx.fillStyle = '#06b6d4';
   ctx.font = 'bold 28px -apple-system, "PingFang SC", sans-serif';
   ctx.fillText('▸ 打开链接, 体验 AI 写歌', 80, footerY + 20);
-  // 域名
   ctx.fillStyle = '#8b5cf6';
   ctx.font = 'bold 38px -apple-system, sans-serif';
   ctx.fillText('lingxiking.github.io/ai-write-v2', 80, footerY + 80);
-  // 副提示
   ctx.fillStyle = 'rgba(148,163,184,0.7)';
   ctx.font = '24px -apple-system, "PingFang SC", sans-serif';
   ctx.fillText('输入主题, 30 秒生成你的专属原创歌曲', 80, footerY + 125);
-  // 在弹窗中显示图片 (仅预览, 不跳转页面)
+
+  // ---------- 3. 输出到弹窗 (仅预览, 不跳页) ----------
   const modal = document.getElementById('posterModal');
   const img = document.getElementById('posterImg');
+  const dataUrl = canvas.toDataURL('image/png');
+  // 缓存 dataUrl 给 savePoster 使用, 避免再从 img.src fetch data URL 失败
+  window.__posterDataUrl = dataUrl;
   if (modal && img) {
-    img.src = canvas.toDataURL('image/png');
+    img.src = dataUrl;
     modal.classList.remove('hidden');
-    // iOS 显示长按保存提示
     const hint = document.getElementById('posterHint');
     if (hint) hint.style.display = /iphone|ipad|ipod/i.test(navigator.userAgent) ? 'block' : 'none';
   } else {
-    // 极端兜底: 触发下载, 不使用 window.open (避免跳页)
     const a = document.createElement('a');
-    a.href = canvas.toDataURL('image/png');
+    a.href = dataUrl;
     a.download = topic + '-海报.png';
     a.rel = 'noopener';
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
@@ -1119,47 +1158,64 @@ function closePosterModal() {
 
 async function savePoster() {
   const img = document.getElementById('posterImg');
-  if (!img || !img.src) return;
+  const dataUrl = window.__posterDataUrl || (img && img.src);
+  if (!dataUrl) return;
   const topic = S.topic || '灵犀King·AI写歌';
   const fname = topic + '-海报.png';
-  // 优先尝试 Web Share API (iOS Safari 可直接保存到相册/分享)
+
+  // 统一把 data URL 转成 Blob, 再走下载/分享 (blob 方式最稳)
+  let blob;
   try {
-    let blob = null;
-    try {
-      const resp = await fetch(img.src);
+    if (dataUrl.startsWith('data:')) {
+      blob = dataUrlToBlob(dataUrl);
+    } else {
+      const resp = await fetch(dataUrl);
       blob = await resp.blob();
-    } catch (_) { blob = null; }
-    if (blob) {
-      const file = new File([blob], fname, { type: blob.type || 'image/png' });
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({ files: [file], title: topic + ' - 歌词海报' });
-        return;
-      }
     }
-    // 桌面/安卓: 触发下载
+  } catch (e) {
+    showStatus('图片生成失败, 请重试', 'error');
+    return;
+  }
+
+  // 1. iOS / 支持 Web Share 的设备: 调系统分享 (可"存储图像")
+  try {
+    const file = new File([blob], fname, { type: blob.type || 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: topic + ' - 歌词海报' });
+      return;
+    }
+  } catch (e) {
+    if (e && e.name === 'AbortError') return;
+  }
+
+  // 2. 其他浏览器: blob URL + <a download> (比直接用 data URL 更可靠)
+  try {
+    const blobUrl = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = img.src;
+    a.href = blobUrl;
     a.download = fname;
     a.rel = 'noopener';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    // iOS Safari 上 download 属性不生效, 会直接打开图片; 提示长按保存
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 1500);
     if (/iphone|ipad|ipod/i.test(navigator.userAgent)) {
       showStatus('请长按图片选择"存储到相册"', 'info');
     }
   } catch (e) {
-    if (e && e.name === 'AbortError') return;
-    // 兜底: 触发下载, 不使用 window.open (避免跳页)
-    try {
-      const a = document.createElement('a');
-      a.href = img.src;
-      a.download = fname;
-      a.rel = 'noopener';
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    } catch (_) {}
-    showStatus('请长按图片选择"存储图像"', 'info');
+    showStatus('保存失败: ' + (e && e.message || e), 'error');
   }
+}
+
+// dataURL -> Blob (避免用 fetch(data:), 部分浏览器对 data URL 的 fetch 有限制)
+function dataUrlToBlob(dataUrl) {
+  const [meta, b64] = dataUrl.split(',');
+  const mime = (meta.match(/data:(.*?);base64/) || [])[1] || 'image/png';
+  const bin = atob(b64);
+  const len = bin.length;
+  const u8 = new Uint8Array(len);
+  for (let i = 0; i < len; i++) u8[i] = bin.charCodeAt(i);
+  return new Blob([u8], { type: mime });
 }
 
 function copyToClipboard(text) {
@@ -1322,7 +1378,7 @@ showStep(1);
       <button onclick="closePosterModal()" aria-label="关闭" style="width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.1);color:#fff;border:none;font-size:16px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center">×</button>
     </div>
     <div style="flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;justify-content:center">
-      <img id="posterImg" alt="歌词海报" style="display:block;width:100%;max-width:360px;height:auto;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.4)"/>
+      <img id="posterImg" alt="歌词海报" style="display:block;width:auto;max-width:100%;max-height:65vh;height:auto;margin:0 auto;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.4)"/>
     </div>
     <div class="flex gap-2 mt-3 flex-shrink-0" style="padding-top:8px;border-top:1px solid rgba(255,255,255,0.08)">
       <button onclick="savePoster()" class="flex-1" style="padding:14px;border-radius:12px;color:#fff;font-weight:600;font-size:15px;border:none;cursor:pointer;background:linear-gradient(135deg,#7c3aed,#d946ef);box-shadow:0 2px 10px rgba(124,58,237,0.35)">💾 保存图片</button>
