@@ -90,8 +90,10 @@ textarea.input-field{min-height:200px;resize:vertical;font-family:inherit;line-h
 .result-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;text-align:center}
 .result-card .label{font-size:13px;color:var(--text-dim);margin-bottom:12px}
 .result-card audio{width:100%;margin:8px 0}
-.result-card .download-btn{display:inline-block;margin-top:8px;padding:8px 20px;border-radius:8px;background:var(--card-hover);border:1px solid var(--border);color:var(--text);font-size:13px;cursor:pointer;text-decoration:none;transition:all .3s}
-.result-card .download-btn:hover{background:var(--purple);border-color:var(--purple)}
+.result-card .download-btn{display:inline-block;margin-top:8px;padding:8px 20px;border-radius:8px;background:linear-gradient(135deg,#a855f7,#7c3aed);border:1px solid rgba(168,85,247,0.5);color:#fff;font-size:13px;cursor:pointer;text-decoration:none;transition:all .3s;box-shadow:0 2px 8px rgba(124,58,237,0.25)}
+.result-card .download-btn:hover{background:linear-gradient(135deg,#b866ff,#8b46f5);border-color:rgba(168,85,247,0.8);transform:translateY(-1px);box-shadow:0 4px 14px rgba(124,58,237,0.4)}
+.result-card .share-btn{display:inline-block;margin-top:8px;padding:8px 20px;border-radius:8px;background:linear-gradient(135deg,#06b6d4,#6366f1);border:1px solid rgba(99,102,241,0.5);color:#fff;font-size:13px;cursor:pointer;transition:all .3s;box-shadow:0 2px 8px rgba(99,102,241,0.25)}
+.result-card .share-btn:hover{background:linear-gradient(135deg,#22d3ee,#818cf8);transform:translateY(-1px);box-shadow:0 4px 14px rgba(99,102,241,0.4)}
 
 /* Lyrics display */
 .lyrics-preview{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:16px;margin:12px 0;max-height:300px;overflow-y:auto;font-size:14px;line-height:2;white-space:pre-wrap}
@@ -185,7 +187,7 @@ textarea.input-field{min-height:200px;resize:vertical;font-family:inherit;line-h
       <div class="style-grid" id="styleGrid">
         <span class="style-tag active" data-style="pop" data-prompt="流行,优美旋律,抒情,朗朗上口">🎵 流行</span>
         <span class="style-tag" data-style="rock" data-prompt="摇滚,力量感,电吉他,有冲击力,旋律优美">🎸 摇滚</span>
-        <span class="style-tag" data-style="folk" data-prompt="民谣,木吉他,温暖,真情实感,旋律动人">🪕 民谣</span>
+        <span class="style-tag" data-style="folk" data-prompt="民谣,赵雷风格,木吉他,温暖,真情实感,叙事性,诗意,城市民谣">🪕 赵雷风</span>
         <span class="style-tag" data-style="electronic" data-prompt="电子,合成器,律动感,现代制作">🎹 电子</span>
         <span class="style-tag" data-style="rnb" data-prompt="R&B,灵魂,律动,转音,深情">🎤 R&B</span>
         <span class="style-tag" data-style="country" data-prompt="乡村,清新,叙事,温暖,吉他">🤠 乡村</span>
@@ -198,6 +200,13 @@ textarea.input-field{min-height:200px;resize:vertical;font-family:inherit;line-h
         <span class="style-tag" data-style="metal" data-prompt="金属,重,双踩,力量,史诗感">🤘 金属</span>
         <span class="style-tag" data-style="indie" data-prompt="独立音乐,清新,独特,文艺,自然">🌿 独立</span>
         <span class="style-tag" data-style="reggae" data-prompt="雷鬼,轻松,律动,慵懒,阳光">🌴 雷鬼</span>
+      </div>
+      <div class="ref-tags" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;align-items:center">
+        <span style="font-size:11px;color:var(--text-dim);margin-right:4px">参考：</span>
+        <span class="ref-tag" data-ref="赵雷">赵雷</span>
+        <span class="ref-tag" data-ref="汪峰">汪峰</span>
+        <span class="ref-tag" data-ref="Beyond">Beyond</span>
+        <span class="ref-tag" data-ref="任贤齐">任贤齐</span>
       </div>
     </div>
 
@@ -274,13 +283,13 @@ textarea.input-field{min-height:200px;resize:vertical;font-family:inherit;line-h
       <div class="label">版本 A</div>
       <audio id="audioA" controls></audio>
       <a class="download-btn" id="downloadA" download>下载 A</a>
-      <button id="shareBtnA" onclick="shareAudio('A')" style="display:none;margin-top:8px;padding:10px 16px;background:#10b981;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px">分享 A</button>
+      <button id="shareBtnA" class="share-btn" onclick="shareAudio('A')" style="display:none">📤 分享 A</button>
     </div>
     <div class="result-card fade-in">
       <div class="label">版本 B</div>
       <audio id="audioB" controls></audio>
       <a class="download-btn" id="downloadB" download>下载 B</a>
-      <button id="shareBtnB" onclick="shareAudio('B')" style="display:none;margin-top:8px;padding:10px 16px;background:#10b981;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px">分享 B</button>
+      <button id="shareBtnB" class="share-btn" onclick="shareAudio('B')" style="display:none">📤 分享 B</button>
     </div>
   </div>
 
@@ -521,7 +530,7 @@ async function generateLyrics() {
     if (isLocal) {
       // Direct DeepSeek call (for local testing)
       const styleMap = {
-        pop: '流行', rock: '摇滚', folk: '民谣', electronic: '电子',
+        pop: '流行', rock: '摇滚', folk: '赵雷风', electronic: '电子',
         rnb: 'R&B', country: '乡村', ballad: '抒情叙事', blues: '蓝调',
         jazz: '爵士', hiphop: '说唱', chinese: '中国风', punk: '朋克',
         metal: '金属', indie: '独立', reggae: '雷鬼'
@@ -701,7 +710,7 @@ async function generateSongs() {
   const styleVoice = {
     pop: S.voice === 'male' ? '流行男歌手,清亮嗓音,旋律感强,副歌爆发力' : '流行女歌手,甜美嗓音,高音清亮,情感细腻',
     rock: S.voice === 'male' ? '摇滚男歌手,嘶吼有力,沙哑烟嗓,现场感强' : '摇滚女歌手,高亢有力,爆发力强,略带沙哑',
-    folk: S.voice === 'male' ? '民谣男歌手,朴素吟唱,嗓音低沉温暖,像在深夜自弹自唱,禁止转音,禁止尾音炫技,句尾自然收住不拖长' : '民谣女歌手,清澈嗓音,轻声细语,像在耳边说悄悄话,禁止转音,禁止尾音花哨,质朴自然不加修饰',
+    folk: S.voice === 'male' ? '赵雷风民谣男歌手,朴素吟唱,嗓音低沉温暖,像在深夜自弹自唱,禁止转音,禁止尾音炫技,句尾自然收住不拖长' : '民谣女歌手,清澈嗓音,轻声细语,像在耳边说悄悄话,禁止转音,禁止尾音花哨,质朴自然不加修饰',
     electronic: S.voice === 'male' ? '电子男歌手,迷幻嗓音,效果器处理,未来感' : '电子女歌手,空灵嗓音,飘渺感,带效果器',
     rnb: S.voice === 'male' ? 'R&B男歌手,转音丝滑,律动感强,深情低吟' : 'R&B女歌手,转音丰富,磁性嗓音,性感慵懒',
     country: S.voice === 'male' ? '乡村男歌手,质朴嗓音,叙事感强,阳光温暖' : '乡村女歌手,清新嗓音,甜美自然,像阳光般温暖',
@@ -721,7 +730,7 @@ async function generateSongs() {
   const styleArrangement = {
     pop: ['流行编曲,朗朗上口的旋律,节奏感强,副歌记忆点强', '流行编曲,层次递进,弦乐铺底,情绪饱满,高潮爆发'],
     rock: ['摇滚编曲,电吉他riff驱动,鼓点有力,副歌嘶吼感,现场氛围', '另类摇滚,氛围感前奏渐入,失真吉他叠加,爆发力强'],
-    folk: ['民谣编曲,木吉他弹唱为主,口琴穿插,赵照风格,朴素温暖,像在深夜讲故事,间奏口琴solo,不要花哨编曲,不要弦乐', '独立民谣,木吉他指弹,口琴呼应,宋冬野风格,低沉嗓音,情感克制内敛,间奏口琴或吉他solo,编曲简洁有层次'],
+    folk: ['赵雷风城市民谣编曲,木吉他弹唱为主,口琴穿插,朴素温暖,像在深夜讲故事,间奏口琴solo,不要花哨编曲,不要弦乐', '独立民谣,木吉他指弹,口琴呼应,赵雷风格,低沉嗓音,情感克制内敛,间奏口琴或吉他solo,编曲简洁有层次'],
     electronic: ['电子编曲,合成器铺底,节拍律动强,drops设计感,氛围感', '电子编曲,琶音器开场,渐进式build-up,副歌drop爆发'],
     rnb: ['R&B编曲,律动鼓点,贝斯线条流畅,转音空间大,深情演绎', 'Neo-Soul风格,钢琴和弦,慵懒律动,和声丰富,副歌情感爆发'],
     country: ['乡村编曲,木吉他扫弦,班卓琴点缀,叙事感强,阳光温暖', '乡村民谣,口琴开场,吉他伴奏,像公路旅行般自由,副歌旋律优美'],
@@ -1014,17 +1023,111 @@ function shareLyrics() {
   const sheet = document.getElementById('shareSheet');
   if (sheet) sheet.classList.add('hidden');
   const topic = S.topic || '灵犀King·AI写歌';
-  const text = `【${topic}】\n\n${S.lyrics}\n\n—— 灵犀King·AI写歌\nhttps://lingxiking.github.io/ai-write-v2/`;
-  
-  if (navigator.share) {
-    navigator.share({
-      title: `${topic} - 歌词`,
-      text: text
-    }).catch(() => {});
+  const lyrics = S.lyrics || '';
+  const cw = 1080, ch = 1920;
+  const canvas = document.createElement('canvas');
+  canvas.width = cw; canvas.height = ch;
+  const ctx = canvas.getContext('2d');
+  // 背景渐变
+  const grad = ctx.createLinearGradient(0, 0, cw, ch);
+  grad.addColorStop(0, '#1a1035');
+  grad.addColorStop(1, '#0a0a0f');
+  ctx.fillStyle = grad; ctx.fillRect(0, 0, cw, ch);
+  // 装饰光斑
+  const rg = ctx.createRadialGradient(cw*0.8, ch*0.15, 0, cw*0.8, ch*0.15, 500);
+  rg.addColorStop(0, 'rgba(139,92,246,0.35)');
+  rg.addColorStop(1, 'rgba(139,92,246,0)');
+  ctx.fillStyle = rg; ctx.fillRect(0, 0, cw, ch);
+  const rg2 = ctx.createRadialGradient(cw*0.15, ch*0.85, 0, cw*0.15, ch*0.85, 500);
+  rg2.addColorStop(0, 'rgba(6,182,212,0.25)');
+  rg2.addColorStop(1, 'rgba(6,182,212,0)');
+  ctx.fillStyle = rg2; ctx.fillRect(0, 0, cw, ch);
+  // 顶部品牌
+  ctx.fillStyle = '#8b5cf6';
+  ctx.font = 'bold 56px -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif';
+  ctx.fillText('灵犀King · AI写歌', 80, 180);
+  ctx.fillStyle = '#94a3b8';
+  ctx.font = '32px -apple-system, "PingFang SC", sans-serif';
+  ctx.fillText('AI 为你创作专属原创歌曲', 80, 235);
+  // 分隔线
+  ctx.strokeStyle = 'rgba(139,92,246,0.4)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(80, 290); ctx.lineTo(cw-80, 290); ctx.stroke();
+  // 标题
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 84px -apple-system, "PingFang SC", sans-serif';
+  ctx.fillText(topic, 80, 420);
+  // 歌词
+  ctx.fillStyle = '#e2e8f0';
+  ctx.font = '44px -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif';
+  const maxWidth = cw - 160;
+  const lineHeight = 72;
+  const lines = lyrics.split('\n');
+  let y = 540;
+  function wrapLine(line) {
+    if (!line) return [''];
+    const out = []; let cur = '';
+    for (const ch of line) {
+      const test = cur + ch;
+      if (ctx.measureText(test).width > maxWidth) { out.push(cur); cur = ch; }
+      else cur = test;
+    }
+    if (cur) out.push(cur);
+    return out;
+  }
+  for (const raw of lines) {
+    if (y > ch - 280) break;
+    const wrapped = wrapLine(raw);
+    for (const wl of wrapped) {
+      if (y > ch - 280) break;
+      ctx.fillText(wl, 80, y);
+      y += lineHeight;
+    }
+  }
+  // 底部信息
+  ctx.fillStyle = '#94a3b8';
+  ctx.font = '30px -apple-system, "PingFang SC", sans-serif';
+  ctx.fillText('扫码体验，创作你的专属歌曲', 80, ch - 180);
+  ctx.fillStyle = '#8b5cf6';
+  ctx.font = 'bold 36px -apple-system, sans-serif';
+  ctx.fillText('lingxiking.github.io/ai-write-v2', 80, ch - 120);
+  // 在弹窗中显示图片
+  const modal = document.getElementById('posterModal');
+  const img = document.getElementById('posterImg');
+  if (modal && img) {
+    img.src = canvas.toDataURL('image/png');
+    modal.classList.remove('hidden');
   } else {
-    // Fallback: copy to clipboard
-    copyToClipboard(text);
-    showStatus('歌词已复制，可粘贴到微信分享', 'success');
+    const a = document.createElement('a');
+    a.href = canvas.toDataURL('image/png');
+    a.download = topic + '-海报.png';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  }
+}
+
+function closePosterModal() {
+  const modal = document.getElementById('posterModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+async function savePoster() {
+  const img = document.getElementById('posterImg');
+  if (!img || !img.src) return;
+  try {
+    const resp = await fetch(img.src);
+    const blob = await resp.blob();
+    const topic = S.topic || '灵犀King·AI写歌';
+    const fname = topic + '-海报.png';
+    const file = new File([blob], fname, { type: blob.type || 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: topic + ' - 歌词海报' });
+    } else {
+      const a = document.createElement('a');
+      a.href = img.src;
+      a.download = fname;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    }
+  } catch (e) {
+    if (e && e.name !== 'AbortError') showStatus('保存失败: ' + (e && e.message || e), 'error');
   }
 }
 
@@ -1177,5 +1280,57 @@ showStep(1);
     <button onclick="document.getElementById('shareSheet').classList.add('hidden')" class="w-full py-3 rounded-xl text-white/60 text-sm mt-1">取消</button>
   </div>
 </div>
+
+<!-- 歌词海报弹窗 -->
+<div id="posterModal" class="hidden fixed inset-0 z-[70] flex items-center justify-center p-4" onclick="if(event.target===this)closePosterModal()">
+  <div class="absolute inset-0 bg-black/70"></div>
+  <div class="relative w-full max-w-md rounded-2xl p-4" style="background:linear-gradient(160deg,#1a1035,#0f0a1f);max-height:90vh;overflow-y:auto;-webkit-overflow-scrolling:touch">
+    <h3 class="text-white text-lg font-semibold mb-3 text-center">歌词海报</h3>
+    <img id="posterImg" alt="歌词海报" class="w-full rounded-xl mb-3" style="display:block"/>
+    <div class="flex gap-2 pb-1">
+      <button onclick="savePoster()" class="flex-1 py-3 rounded-xl text-white font-semibold" style="background:linear-gradient(135deg,#7c3aed,#d946ef)">💾 保存图片</button>
+      <button onclick="closePosterModal()" class="flex-1 py-3 rounded-xl bg-white/10 text-white">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- 音频分享弹窗 -->
+<div id="audioShareModal" class="hidden fixed inset-0 z-[70] flex items-center justify-center p-4" onclick="if(event.target===this)closeAudioShareModal()">
+  <div class="absolute inset-0 bg-black/70"></div>
+  <div class="relative w-full max-w-sm rounded-2xl p-5 text-center" style="background:linear-gradient(160deg,#1a1035,#0f0a1f)">
+    <div id="audioShareIcon" class="text-4xl mb-2">🎵</div>
+    <h3 id="audioShareTitle" class="text-white text-lg font-semibold mb-2">分享歌曲</h3>
+    <p id="audioShareText" class="text-white/70 text-sm mb-4">正在准备音频文件...</p>
+    <button onclick="closeAudioShareModal()" class="w-full py-3 rounded-xl bg-white/10 text-white">取消</button>
+  </div>
+</div>
+
+<script>
+function closePosterModal() {
+  document.getElementById('posterModal').classList.add('hidden');
+}
+function closeAudioShareModal() {
+  document.getElementById('audioShareModal').classList.add('hidden');
+}
+function showPosterModal(dataUrl) {
+  const img = document.getElementById('posterImg');
+  img.src = dataUrl;
+  document.getElementById('posterModal').classList.remove('hidden');
+}
+async function savePoster() {
+  const img = document.getElementById('posterImg');
+  if (!img || !img.src) return;
+  try {
+    const link = document.createElement('a');
+    link.download = '歌词海报.png';
+    link.href = img.src;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (e) {
+    window.open(img.src, '_blank');
+  }
+}
+</script>
 </body>
 </html>
