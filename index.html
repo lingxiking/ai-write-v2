@@ -1035,27 +1035,27 @@ function shareLyrics() {
   rg2.addColorStop(0, 'rgba(6,182,212,0.25)');
   rg2.addColorStop(1, 'rgba(6,182,212,0)');
   ctx.fillStyle = rg2; ctx.fillRect(0, 0, cw, ch);
-  // 顶部品牌
+  // 顶部品牌区 (压缩高度, 给歌词更多空间)
   ctx.fillStyle = '#8b5cf6';
-  ctx.font = 'bold 56px -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif';
-  ctx.fillText('灵犀King · AI写歌', 80, 180);
+  ctx.font = 'bold 52px -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif';
+  ctx.fillText('灵犀King · AI写歌', 80, 150);
   ctx.fillStyle = '#94a3b8';
-  ctx.font = '32px -apple-system, "PingFang SC", sans-serif';
-  ctx.fillText('AI 为你创作专属原创歌曲', 80, 235);
+  ctx.font = '28px -apple-system, "PingFang SC", sans-serif';
+  ctx.fillText('AI 为你创作专属原创歌曲', 80, 198);
   // 分隔线
   ctx.strokeStyle = 'rgba(139,92,246,0.4)'; ctx.lineWidth = 2;
-  ctx.beginPath(); ctx.moveTo(80, 290); ctx.lineTo(cw-80, 290); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(80, 240); ctx.lineTo(cw-80, 240); ctx.stroke();
   // 标题
   ctx.fillStyle = '#fff';
   ctx.font = 'bold 84px -apple-system, "PingFang SC", sans-serif';
-  ctx.fillText(topic, 80, 420);
+  ctx.fillText(topic, 80, 370);
   // 歌词
   ctx.fillStyle = '#e2e8f0';
   ctx.font = '44px -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif';
   const maxWidth = cw - 160;
   const lineHeight = 72;
   const lines = lyrics.split('\n');
-  let y = 540;
+  let y = 490;
   function wrapLine(line) {
     if (!line) return [''];
     const out = []; let cur = '';
@@ -1068,21 +1068,31 @@ function shareLyrics() {
     return out;
   }
   for (const raw of lines) {
-    if (y > ch - 280) break;
+    if (y > ch - 360) break;
     const wrapped = wrapLine(raw);
     for (const wl of wrapped) {
-      if (y > ch - 280) break;
+      if (y > ch - 360) break;
       ctx.fillText(wl, 80, y);
       y += lineHeight;
     }
   }
-  // 底部信息
-  ctx.fillStyle = '#94a3b8';
-  ctx.font = '30px -apple-system, "PingFang SC", sans-serif';
-  ctx.fillText('扫码体验，创作你的专属歌曲', 80, ch - 180);
+  // 底部信息 (优化引导语)
+  const footerY = ch - 200;
+  // 分隔线
+  ctx.strokeStyle = 'rgba(139,92,246,0.25)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(80, footerY - 30); ctx.lineTo(cw-80, footerY - 30); ctx.stroke();
+  // 小箭头/链接图标
+  ctx.fillStyle = '#06b6d4';
+  ctx.font = 'bold 28px -apple-system, "PingFang SC", sans-serif';
+  ctx.fillText('▸ 打开链接, 体验 AI 写歌', 80, footerY + 20);
+  // 域名
   ctx.fillStyle = '#8b5cf6';
-  ctx.font = 'bold 36px -apple-system, sans-serif';
-  ctx.fillText('lingxiking.github.io/ai-write-v2', 80, ch - 120);
+  ctx.font = 'bold 38px -apple-system, sans-serif';
+  ctx.fillText('lingxiking.github.io/ai-write-v2', 80, footerY + 80);
+  // 副提示
+  ctx.fillStyle = 'rgba(148,163,184,0.7)';
+  ctx.font = '24px -apple-system, "PingFang SC", sans-serif';
+  ctx.fillText('输入主题, 30 秒生成你的专属原创歌曲', 80, footerY + 125);
   // 在弹窗中显示图片 (仅预览, 不跳转页面)
   const modal = document.getElementById('posterModal');
   const img = document.getElementById('posterImg');
