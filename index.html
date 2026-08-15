@@ -1028,12 +1028,6 @@ function shareLyrics() {
   }
 }
 
-function copyLyrics() {
-  const text = `【${S.topic || '灵犀King·AI写歌'}】\n\n${S.lyrics}`;
-  copyToClipboard(text);
-  showStatus('歌词已复制到剪贴板', 'success');
-}
-
 function copyToClipboard(text) {
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(text).catch(() => {
