@@ -185,9 +185,9 @@ textarea.input-field{min-height:200px;resize:vertical;font-family:inherit;line-h
     <div class="input-group">
       <label>音乐风格</label>
       <div class="style-grid" id="styleGrid">
-        <span class="style-tag active" data-style="pop" data-prompt="流行,优美旋律,抒情,朗朗上口">🎵 流行</span>
-        <span class="style-tag" data-style="rock" data-prompt="摇滚,力量感,电吉他,有冲击力,旋律优美">🎸 摇滚</span>
-        <span class="style-tag" data-style="folk" data-prompt="民谣,赵雷风格,木吉他,温暖,真情实感,叙事性,诗意,城市民谣">🪕 赵雷风</span>
+        <span class="style-tag active" data-style="pop" data-prompt="流行,任贤齐风格,阳光温暖,旋律朗朗上口,吉他流行,90年代华语流行,副歌记忆点强">🎵 流行</span>
+        <span class="style-tag" data-style="rock" data-prompt="摇滚,Beyond风格,汪峰风格,电吉他riff,鼓点有力,励志激昂,旋律性摇滚,副歌嘶吼感">🎸 摇滚</span>
+        <span class="style-tag" data-style="folk" data-prompt="民谣,赵雷风格,木吉他,温暖,真情实感,叙事性,诗意,城市民谣,口琴穿插">🪕 民谣</span>
         <span class="style-tag" data-style="electronic" data-prompt="电子,合成器,律动感,现代制作">🎹 电子</span>
         <span class="style-tag" data-style="rnb" data-prompt="R&B,灵魂,律动,转音,深情">🎤 R&B</span>
         <span class="style-tag" data-style="country" data-prompt="乡村,清新,叙事,温暖,吉他">🤠 乡村</span>
@@ -200,13 +200,6 @@ textarea.input-field{min-height:200px;resize:vertical;font-family:inherit;line-h
         <span class="style-tag" data-style="metal" data-prompt="金属,重,双踩,力量,史诗感">🤘 金属</span>
         <span class="style-tag" data-style="indie" data-prompt="独立音乐,清新,独特,文艺,自然">🌿 独立</span>
         <span class="style-tag" data-style="reggae" data-prompt="雷鬼,轻松,律动,慵懒,阳光">🌴 雷鬼</span>
-      </div>
-      <div class="ref-tags" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;align-items:center">
-        <span style="font-size:11px;color:var(--text-dim);margin-right:4px">参考：</span>
-        <span class="ref-tag" data-ref="赵雷">赵雷</span>
-        <span class="ref-tag" data-ref="汪峰">汪峰</span>
-        <span class="ref-tag" data-ref="Beyond">Beyond</span>
-        <span class="ref-tag" data-ref="任贤齐">任贤齐</span>
       </div>
     </div>
 
@@ -530,7 +523,7 @@ async function generateLyrics() {
     if (isLocal) {
       // Direct DeepSeek call (for local testing)
       const styleMap = {
-        pop: '流行', rock: '摇滚', folk: '赵雷风', electronic: '电子',
+        pop: '流行', rock: '摇滚', folk: '民谣', electronic: '电子',
         rnb: 'R&B', country: '乡村', ballad: '抒情叙事', blues: '蓝调',
         jazz: '爵士', hiphop: '说唱', chinese: '中国风', punk: '朋克',
         metal: '金属', indie: '独立', reggae: '雷鬼'
@@ -708,9 +701,9 @@ async function generateSongs() {
   
   // Style-specific vocal descriptions (key to matching overall feel)
   const styleVoice = {
-    pop: S.voice === 'male' ? '流行男歌手,清亮嗓音,旋律感强,副歌爆发力' : '流行女歌手,甜美嗓音,高音清亮,情感细腻',
-    rock: S.voice === 'male' ? '摇滚男歌手,嘶吼有力,沙哑烟嗓,现场感强' : '摇滚女歌手,高亢有力,爆发力强,略带沙哑',
-    folk: S.voice === 'male' ? '赵雷风民谣男歌手,朴素吟唱,嗓音低沉温暖,像在深夜自弹自唱,禁止转音,禁止尾音炫技,句尾自然收住不拖长' : '民谣女歌手,清澈嗓音,轻声细语,像在耳边说悄悄话,禁止转音,禁止尾音花哨,质朴自然不加修饰',
+    pop: S.voice === 'male' ? '任贤齐风格流行男歌手,阳光温暖,音色干净清亮,中音区扎实,副歌略带鼻音的辨识度,90年代华语情歌质感,旋律感强,不要过度转音' : '流行女歌手,甜美嗓音,高音清亮,情感细腻',
+    rock: S.voice === 'male' ? '摇滚男歌手,汪峰式沙哑烟嗓与Beyond式清亮励志唱腔融合,嘶吼有力,中高音扎实,现场感强,副歌有呐喊感' : '摇滚女歌手,高亢有力,爆发力强,略带沙哑',
+    folk: S.voice === 'male' ? '赵雷风民谣男歌手,朴素吟唱,嗓音低沉温暖,像在深夜自弹自唱,咬字清晰有叙事感,禁止转音,禁止尾音炫技,句尾自然收住不拖长' : '民谣女歌手,清澈嗓音,轻声细语,像在耳边说悄悄话,禁止转音,禁止尾音花哨,质朴自然不加修饰',
     electronic: S.voice === 'male' ? '电子男歌手,迷幻嗓音,效果器处理,未来感' : '电子女歌手,空灵嗓音,飘渺感,带效果器',
     rnb: S.voice === 'male' ? 'R&B男歌手,转音丝滑,律动感强,深情低吟' : 'R&B女歌手,转音丰富,磁性嗓音,性感慵懒',
     country: S.voice === 'male' ? '乡村男歌手,质朴嗓音,叙事感强,阳光温暖' : '乡村女歌手,清新嗓音,甜美自然,像阳光般温暖',
@@ -728,9 +721,9 @@ async function generateSongs() {
   
   // Style-specific arrangement hints (Chinese for better MiniMax understanding)
   const styleArrangement = {
-    pop: ['流行编曲,朗朗上口的旋律,节奏感强,副歌记忆点强', '流行编曲,层次递进,弦乐铺底,情绪饱满,高潮爆发'],
-    rock: ['摇滚编曲,电吉他riff驱动,鼓点有力,副歌嘶吼感,现场氛围', '另类摇滚,氛围感前奏渐入,失真吉他叠加,爆发力强'],
-    folk: ['赵雷风城市民谣编曲,木吉他弹唱为主,口琴穿插,朴素温暖,像在深夜讲故事,间奏口琴solo,不要花哨编曲,不要弦乐', '独立民谣,木吉他指弹,口琴呼应,赵雷风格,低沉嗓音,情感克制内敛,间奏口琴或吉他solo,编曲简洁有层次'],
+    pop: ['任贤齐风格流行编曲,干净的木吉他扫弦与电吉他分解,温暖的贝斯线,90年代华语情歌鼓点,副歌弦乐铺底,阳光真诚,旋律朗朗上口,记忆点强', '流行情歌编曲,钢琴前奏,木吉他与轻打击乐交织,任贤齐式温暖叙事感,副歌和声叠加,情绪饱满但不炫技'],
+    rock: ['Beyond风格摇滚编曲,黄家驹式电吉他solo与分解和弦,铿锵有力的鼓点,励志主旋律,汪峰式弦乐铺底增强厚度,副歌大合唱感,间奏吉他solo', '华语流行摇滚,失真电吉他riff驱动,贝斯线条厚重,汪峰式民谣摇滚质感,Beyond式旋律性副歌,鼓点稳健有力,情绪层层推进'],
+    folk: ['赵雷风城市民谣编曲,木吉他弹唱为主,口琴穿插,朴素温暖,像在深夜讲故事,间奏口琴solo,不要花哨编曲,不要弦乐,手鼓或卡洪鼓轻打节奏', '独立民谣,木吉他指弹,口琴呼应,赵雷风格,低沉嗓音,情感克制内敛,间奏口琴或吉他solo,编曲简洁有层次,偶尔加入曼陀铃点缀'],
     electronic: ['电子编曲,合成器铺底,节拍律动强,drops设计感,氛围感', '电子编曲,琶音器开场,渐进式build-up,副歌drop爆发'],
     rnb: ['R&B编曲,律动鼓点,贝斯线条流畅,转音空间大,深情演绎', 'Neo-Soul风格,钢琴和弦,慵懒律动,和声丰富,副歌情感爆发'],
     country: ['乡村编曲,木吉他扫弦,班卓琴点缀,叙事感强,阳光温暖', '乡村民谣,口琴开场,吉他伴奏,像公路旅行般自由,副歌旋律优美'],
