@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>灵犀King·AI写歌 V2</title>
+<title>灵犀King·AI写歌</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -156,7 +156,6 @@ textarea.input-field{min-height:200px;resize:vertical;font-family:inherit;line-h
 <div class="container">
   <!-- Header -->
   <div class="header">
-    <div class="version-tag">V2</div>
     <h1>灵犀King·AI写歌</h1>
     <div class="subtitle">输入主题，AI为你创作歌词并谱曲演唱</div>
     <div class="slogan">突破阻力 助力梦想</div>
@@ -275,11 +274,13 @@ textarea.input-field{min-height:200px;resize:vertical;font-family:inherit;line-h
       <div class="label">版本 A</div>
       <audio id="audioA" controls></audio>
       <a class="download-btn" id="downloadA" download>下载 A</a>
+      <button id="shareBtnA" onclick="shareAudio('A')" style="display:none;margin-top:8px;padding:10px 16px;background:#10b981;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px">分享 A</button>
     </div>
     <div class="result-card fade-in">
       <div class="label">版本 B</div>
       <audio id="audioB" controls></audio>
       <a class="download-btn" id="downloadB" download>下载 B</a>
+      <button id="shareBtnB" onclick="shareAudio('B')" style="display:none;margin-top:8px;padding:10px 16px;background:#10b981;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px">分享 B</button>
     </div>
   </div>
 
@@ -287,7 +288,7 @@ textarea.input-field{min-height:200px;resize:vertical;font-family:inherit;line-h
   <div class="result-card fade-in hidden" id="lyricsDownloadCard" style="text-align:center;margin-top:8px">
     <div class="label" style="margin-bottom:10px">📝 歌词</div>
     <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
-      <button class="download-btn" onclick="shareLyrics()" style="display:inline-block;cursor:pointer;border:none;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;padding:8px 16px;border-radius:8px;font-size:13px">📤 分享歌词</button>
+      <button class="download-btn" onclick="showSharePanel()" style="display:inline-block;cursor:pointer;border:none;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;padding:8px 16px;border-radius:8px;font-size:13px">📤 分享歌词</button>
       <button class="download-btn" onclick="copyLyrics()" style="display:inline-block;cursor:pointer;border:none;background:rgba(255,255,255,0.08);color:var(--text);padding:8px 16px;border-radius:8px;font-size:13px;border:1px solid var(--border)">📋 复制歌词</button>
       <a class="download-btn" id="downloadLyrics" download="歌词.txt" style="display:inline-block">💾 下载</a>
     </div>
@@ -302,7 +303,7 @@ textarea.input-field{min-height:200px;resize:vertical;font-family:inherit;line-h
   <!-- Footer -->
   <div class="footer">
     <p>灵犀King · 突破阻力 助力梦想</p>
-    <p style="margin-top:4px"><a href="https://k8z2v3x3yt.coze.site">V1版</a> · <a href="https://cm48fxz886.coze.site">AI导演</a> · <a href="https://qk3k3v3x3yt.coze.site">AI讲解员</a></p>
+    <p style="margin-top:4px"><a href="https://lingxiking.github.io/ai-write-v2/" target="_blank">AI写歌</a> · <a href="https://cm48fxz886.coze.site" target="_blank">AI导演</a> · <a href="https://yqctkk79yt.coze.site" target="_blank">AI OPC</a></p>
   </div>
 </div>
 
@@ -963,7 +964,55 @@ async function pollTask(taskId, label, onProgress) {
 }
 
 // ============ LYRICS SHARE/COPY ============
+function showSharePanel() {
+  const sheet = document.getElementById('shareSheet');
+  if (sheet) sheet.classList.remove('hidden');
+}
+
+function copyLyrics() {
+  const sheet = document.getElementById('shareSheet');
+  if (sheet) sheet.classList.add('hidden');
+  const topic = S.topic || '灵犀King·AI写歌';
+  const text = `【${topic}】\n\n${S.lyrics}\n\n—— 灵犀King·AI写歌\nhttps://lingxiking.github.io/ai-write-v2/`;
+  copyToClipboard(text);
+}
+
+async function shareAudio(label) {
+  const audioEl = document.getElementById('audio' + label);
+  const songMeta = S['result' + label];
+  const url = audioEl ? audioEl.src : (songMeta && (songMeta.audioUrl || songMeta.audio_url));
+  if (!url) { showStatus('暂无可分享的音频', 'error'); return; }
+  const name = (S.songName || S.topic || '灵犀King') + '-' + label;
+  try {
+    showStatus('正在准备音频文件...', 'info');
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error('音频下载失败');
+    const blob = await resp.blob();
+    const ext = (blob.type && blob.type.includes('mp3')) ? 'mp3' : 'mp3';
+    const file = new File([blob], name + '.' + ext, { type: blob.type || 'audio/mpeg' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: name, text: name });
+    } else if (navigator.share) {
+      await navigator.share({ title: name, text: name + '\n' + url });
+    } else {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = name + '.' + ext;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    }
+    showStatus('已分享 ' + label, 'success');
+  } catch (e) {
+    if (e && e.name === 'AbortError') return;
+    showStatus('分享失败: ' + (e && e.message || e), 'error');
+  }
+}
+
 function shareLyrics() {
+  const sheet = document.getElementById('shareSheet');
+  if (sheet) sheet.classList.add('hidden');
   const topic = S.topic || '灵犀King·AI写歌';
   const text = `【${topic}】\n\n${S.lyrics}\n\n—— 灵犀King·AI写歌\nhttps://lingxiking.github.io/ai-write-v2/`;
   
@@ -1039,6 +1088,8 @@ function displayResults(results, versions) {
       audio.src = r.url;
       download.href = r.url;
       download.download = `${displayName}_V${r.label}.mp3`;
+      const shareBtn = document.getElementById(`shareBtn${r.label}`);
+      if (shareBtn) shareBtn.style.display = '';
     }
   });
   
@@ -1076,6 +1127,8 @@ async function retryQuery(taskId, label) {
     audio.src = result.url;
     download.href = result.url;
     download.download = `${S.songName || S.topic || '灵犀King'}_V${result.label}.mp3`;
+    const shareBtn = document.getElementById(`shareBtn${result.label}`);
+    if (shareBtn) shareBtn.style.display = '';
     // Remove retry button
     const retryBtn = audio.parentElement.querySelector('button');
     if (retryBtn) retryBtn.remove();
@@ -1118,5 +1171,17 @@ function hexToBlob(hex) {
 // ============ INIT ============
 showStep(1);
 </script>
+
+<!-- 分享歌词底部面板 -->
+<div id="shareSheet" class="hidden fixed inset-0 z-[60] flex items-end justify-center" onclick="if(event.target===this)this.classList.add('hidden')">
+  <div class="absolute inset-0 bg-black/50"></div>
+  <div class="relative w-full max-w-md bg-[#1a1035] rounded-t-2xl p-5 pb-7" style="animation: slideUp .25s ease">
+    <div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4"></div>
+    <h3 class="text-white text-lg font-semibold mb-4 text-center">分享歌词</h3>
+    <button onclick="shareLyrics()" class="w-full py-3 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-medium mb-2">🎨 生成歌词海报</button>
+    <button onclick="copyLyrics()" class="w-full py-3 rounded-xl bg-white/10 text-white font-medium mb-2">📝 复制歌词文字</button>
+    <button onclick="document.getElementById('shareSheet').classList.add('hidden')" class="w-full py-3 rounded-xl text-white/60 text-sm mt-1">取消</button>
+  </div>
+</div>
 </body>
 </html>
