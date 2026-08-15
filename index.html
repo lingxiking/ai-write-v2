@@ -1008,6 +1008,8 @@ function fallbackCopy(text) {
 
 function displayResults(results, versions) {
   const panel = document.getElementById('resultPanel');
+  // Define displayName early so it can be used throughout the function
+  const displayName = S.songName || S.topic || '灵犀King';
   // Hide step3 card to avoid duplicate UI
   document.getElementById('step3Card').classList.add('hidden');
   let hasSuccess = false, hasError = false;
@@ -1045,7 +1047,6 @@ function displayResults(results, versions) {
   
   // Show song title
   const titleDisplay = document.getElementById('songTitleDisplay');
-  const displayName = S.songName || S.topic || '灵犀King';
   if (displayName) {
     titleDisplay.style.display = 'block';
     titleDisplay.querySelector('span').textContent = `《${displayName}》`;
