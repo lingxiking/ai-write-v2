@@ -1083,16 +1083,21 @@ function shareLyrics() {
   ctx.fillStyle = '#8b5cf6';
   ctx.font = 'bold 36px -apple-system, sans-serif';
   ctx.fillText('lingxiking.github.io/ai-write-v2', 80, ch - 120);
-  // 在弹窗中显示图片
+  // 在弹窗中显示图片 (仅预览, 不跳转页面)
   const modal = document.getElementById('posterModal');
   const img = document.getElementById('posterImg');
   if (modal && img) {
     img.src = canvas.toDataURL('image/png');
     modal.classList.remove('hidden');
+    // iOS 显示长按保存提示
+    const hint = document.getElementById('posterHint');
+    if (hint) hint.style.display = /iphone|ipad|ipod/i.test(navigator.userAgent) ? 'block' : 'none';
   } else {
+    // 极端兜底: 触发下载, 不使用 window.open (避免跳页)
     const a = document.createElement('a');
     a.href = canvas.toDataURL('image/png');
     a.download = topic + '-海报.png';
+    a.rel = 'noopener';
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
   }
 }
@@ -1105,22 +1110,45 @@ function closePosterModal() {
 async function savePoster() {
   const img = document.getElementById('posterImg');
   if (!img || !img.src) return;
+  const topic = S.topic || '灵犀King·AI写歌';
+  const fname = topic + '-海报.png';
+  // 优先尝试 Web Share API (iOS Safari 可直接保存到相册/分享)
   try {
-    const resp = await fetch(img.src);
-    const blob = await resp.blob();
-    const topic = S.topic || '灵犀King·AI写歌';
-    const fname = topic + '-海报.png';
-    const file = new File([blob], fname, { type: blob.type || 'image/png' });
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({ files: [file], title: topic + ' - 歌词海报' });
-    } else {
+    let blob = null;
+    try {
+      const resp = await fetch(img.src);
+      blob = await resp.blob();
+    } catch (_) { blob = null; }
+    if (blob) {
+      const file = new File([blob], fname, { type: blob.type || 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: topic + ' - 歌词海报' });
+        return;
+      }
+    }
+    // 桌面/安卓: 触发下载
+    const a = document.createElement('a');
+    a.href = img.src;
+    a.download = fname;
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    // iOS Safari 上 download 属性不生效, 会直接打开图片; 提示长按保存
+    if (/iphone|ipad|ipod/i.test(navigator.userAgent)) {
+      showStatus('请长按图片选择"存储到相册"', 'info');
+    }
+  } catch (e) {
+    if (e && e.name === 'AbortError') return;
+    // 兜底: 触发下载, 不使用 window.open (避免跳页)
+    try {
       const a = document.createElement('a');
       a.href = img.src;
       a.download = fname;
+      a.rel = 'noopener';
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    }
-  } catch (e) {
-    if (e && e.name !== 'AbortError') showStatus('保存失败: ' + (e && e.message || e), 'error');
+    } catch (_) {}
+    showStatus('请长按图片选择"存储图像"', 'info');
   }
 }
 
@@ -1274,16 +1302,23 @@ showStep(1);
   </div>
 </div>
 
-<!-- 歌词海报弹窗 -->
-<div id="posterModal" class="hidden fixed inset-0 z-[70] flex items-center justify-center p-4" onclick="if(event.target===this)closePosterModal()">
-  <div class="absolute inset-0 bg-black/70"></div>
-  <div class="relative w-full max-w-md rounded-2xl p-4" style="background:linear-gradient(160deg,#1a1035,#0f0a1f);max-height:90vh;overflow-y:auto;-webkit-overflow-scrolling:touch">
-    <h3 class="text-white text-lg font-semibold mb-3 text-center">歌词海报</h3>
-    <img id="posterImg" alt="歌词海报" class="w-full rounded-xl mb-3" style="display:block"/>
-    <div class="flex gap-2 pb-1">
-      <button onclick="savePoster()" class="flex-1 py-3 rounded-xl text-white font-semibold" style="background:linear-gradient(135deg,#7c3aed,#d946ef)">💾 保存图片</button>
-      <button onclick="closePosterModal()" class="flex-1 py-3 rounded-xl bg-white/10 text-white">关闭</button>
+<!-- 歌词海报弹窗 (iOS Safari 兼容: 底部抽屉式, 避免 100vh 与工具栏遮挡) -->
+<div id="posterModal" class="hidden fixed inset-0 z-[70] flex items-end sm:items-center justify-center" onclick="if(event.target===this)closePosterModal()" style="padding:0;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)">
+  <div class="absolute inset-0" style="background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)"></div>
+  <div class="relative w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl flex flex-col" style="background:linear-gradient(160deg,#1a1035,#0f0a1f);max-height:-webkit-fill-available;max-height:92vh;padding:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom));box-shadow:0 -8px 32px rgba(0,0,0,0.5)" onclick="event.stopPropagation()">
+    <div class="flex items-center justify-between mb-3 flex-shrink-0">
+      <div style="width:28px"></div>
+      <h3 class="text-white text-lg font-semibold text-center">歌词海报</h3>
+      <button onclick="closePosterModal()" aria-label="关闭" style="width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.1);color:#fff;border:none;font-size:16px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center">×</button>
     </div>
+    <div style="flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;justify-content:center">
+      <img id="posterImg" alt="歌词海报" style="display:block;width:100%;max-width:360px;height:auto;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.4)"/>
+    </div>
+    <div class="flex gap-2 mt-3 flex-shrink-0" style="padding-top:8px;border-top:1px solid rgba(255,255,255,0.08)">
+      <button onclick="savePoster()" class="flex-1" style="padding:14px;border-radius:12px;color:#fff;font-weight:600;font-size:15px;border:none;cursor:pointer;background:linear-gradient(135deg,#7c3aed,#d946ef);box-shadow:0 2px 10px rgba(124,58,237,0.35)">💾 保存图片</button>
+      <button onclick="closePosterModal()" class="flex-1" style="padding:14px;border-radius:12px;color:#fff;font-size:15px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);cursor:pointer">关闭</button>
+    </div>
+    <div id="posterHint" style="display:none;text-align:center;font-size:12px;color:rgba(255,255,255,0.5);margin-top:8px;flex-shrink:0">iOS 用户可长按上方图片选择"存储到相册"</div>
   </div>
 </div>
 
@@ -1299,30 +1334,8 @@ showStep(1);
 </div>
 
 <script>
-function closePosterModal() {
-  document.getElementById('posterModal').classList.add('hidden');
-}
 function closeAudioShareModal() {
   document.getElementById('audioShareModal').classList.add('hidden');
-}
-function showPosterModal(dataUrl) {
-  const img = document.getElementById('posterImg');
-  img.src = dataUrl;
-  document.getElementById('posterModal').classList.remove('hidden');
-}
-async function savePoster() {
-  const img = document.getElementById('posterImg');
-  if (!img || !img.src) return;
-  try {
-    const link = document.createElement('a');
-    link.download = '歌词海报.png';
-    link.href = img.src;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  } catch (e) {
-    window.open(img.src, '_blank');
-  }
 }
 </script>
 </body>
