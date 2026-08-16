@@ -344,6 +344,42 @@ function saveState(step) {
     localStorage.setItem('aiwrite_state', JSON.stringify(state));
   } catch(e) {}
 }
+
+// ============ MUSIC SESSION (task_id) PERSISTENCE ============
+// 任务提交成功后立即落盘, 页面刷新/切换 App 回来后可恢复轮询, 避免重复生成.
+const MUSIC_SESSION_KEY = 'aiwrite_music_session';
+const MUSIC_SESSION_TTL = 30 * 60 * 1000; // 30 分钟内有效 (MiniMax 生成通常 30-180s)
+
+function saveMusicSession(session) {
+  try {
+    const data = Object.assign({ ts: Date.now(), results: {} }, session);
+    localStorage.setItem(MUSIC_SESSION_KEY, JSON.stringify(data));
+  } catch(e) { console.warn('saveMusicSession failed', e); }
+}
+function loadMusicSession() {
+  try {
+    const raw = localStorage.getItem(MUSIC_SESSION_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (!data || !data.tasks || !data.tasks.length) return null;
+    if (Date.now() - (data.ts || 0) > MUSIC_SESSION_TTL) {
+      localStorage.removeItem(MUSIC_SESSION_KEY);
+      return null;
+    }
+    return data;
+  } catch(e) { return null; }
+}
+function clearMusicSession() {
+  try { localStorage.removeItem(MUSIC_SESSION_KEY); } catch(e) {}
+}
+function updateMusicSession(patch) {
+  try {
+    const cur = loadMusicSession() || { tasks: [], results: {}, ts: Date.now() };
+    const next = Object.assign({}, cur, patch);
+    next.results = Object.assign({}, cur.results || {}, patch.results || {});
+    localStorage.setItem(MUSIC_SESSION_KEY, JSON.stringify(next));
+  } catch(e) {}
+}
 function restoreState() {
   try {
     const raw = localStorage.getItem('aiwrite_state');
@@ -492,6 +528,7 @@ function resetAll() {
   document.getElementById('resultPanel').classList.remove('show');
   document.getElementById('regenRow').classList.add('hidden');
   hideStatus();
+  clearMusicSession();
   showStep(1);
 }
 
@@ -900,6 +937,23 @@ async function generateSongs() {
     const taskIds = tasks.filter(t => !t.direct).map(t => t.task_id);
     window._pendingTaskIds = taskIds; // Save for retry
     updateProgress(20, '🎵 音乐正在云端生成中，可以切到其他app，3分钟后回来看结果');
+
+    // [v4 恢复机制] 提交成功立刻把 task_id 与当前歌曲元信息写入 localStorage,
+    // 即使页面刷新/切 App/WebView 回收, 回来仍能继续轮询, 不需要重新生成.
+    const sessionSnapshot = {
+      tasks: tasks.map(t => t.direct
+        ? { direct: true, url: t.url, label: t.label }
+        : { direct: false, task_id: t.task_id, label: t.label }),
+      meta: {
+        topic: S.topic, songName: S.songName, lyrics: S.lyrics,
+        style: S.style, stylePrompt: S.stylePrompt, voice: S.voice
+      },
+      results: {}
+    };
+    tasks.forEach(t => {
+      if (t.direct) sessionSnapshot.results[t.label] = { url: t.url, label: t.label };
+    });
+    saveMusicSession(sessionSnapshot);
     
     // Poll tasks that need polling
     const results = [];
@@ -912,15 +966,20 @@ async function generateSongs() {
             updateProgress(20 + pct * 0.7, `版本${task.label}制作中... ${Math.round(pct)}%`);
           });
           results.push(result);
+          // 单条完成立即持久化, 避免下一条轮询中页面被关掉丢失结果
+          updateMusicSession({ results: { [task.label]: result } });
         } catch (pollErr) {
           // Polling timed out - save task_id for retry
           results.push({ label: task.label, taskId: task.task_id, error: true });
+          updateMusicSession({ results: { [task.label]: { label: task.label, taskId: task.task_id, error: true } } });
         }
       }
     }
     
     updateProgress(100, '生成完成！');
-    
+
+    // 所有任务结束 (含部分超时) 后保留 session 用于"重新查询",
+    // 只有用户点"写一首新歌"时才真正 clearMusicSession.
     setTimeout(() => {
       hideLoading();
       displayResults(results);
@@ -1337,6 +1396,8 @@ async function retryQuery(taskId, label) {
     // Remove retry button
     const retryBtn = audio.parentElement.querySelector('button');
     if (retryBtn) retryBtn.remove();
+    // [恢复机制] 单版本重新查询成功后写回 session
+    updateMusicSession({ results: { [result.label]: result } });
     showStatus(`版本${label}已生成！`, 'success');
   } catch (err) {
     showStatus(`版本${label}仍在生成中，请稍后再试`, 'info');
@@ -1375,6 +1436,107 @@ function hexToBlob(hex) {
 
 // ============ INIT ============
 showStep(1);
+
+// ============ MUSIC SESSION AUTO-RECOVERY ============
+// 页面加载完后, 如果 localStorage 里有未完成的音乐生成任务,
+// 自动恢复到 step3 + 结果面板, 并对 pending 任务重新发起轮询.
+// 这样用户切 App / 刷新 / WebView 被回收后回来不需要重新生成.
+(async function resumeMusicSession() {
+  const session = loadMusicSession();
+  if (!session || !Array.isArray(session.tasks) || !session.tasks.length) return;
+
+  // 恢复歌曲元信息
+  const m = session.meta || {};
+  if (m.topic) S.topic = m.topic;
+  if (m.songName !== undefined) S.songName = m.songName;
+  if (m.lyrics) S.lyrics = m.lyrics;
+  if (m.style) S.style = m.style;
+  if (m.stylePrompt) S.stylePrompt = m.stylePrompt;
+  if (m.voice) S.voice = m.voice;
+
+  // 同步 UI
+  const topicEl = document.getElementById('topicInput');
+  if (topicEl && m.topic) topicEl.value = m.topic;
+  const lyricsEl = document.getElementById('lyricsEditor');
+  if (lyricsEl && m.lyrics) lyricsEl.value = m.lyrics;
+  const songNameEl = document.getElementById('songNameInput');
+  if (songNameEl) songNameEl.value = m.songName || '';
+  document.querySelectorAll('.style-tag').forEach(t => {
+    t.classList.toggle('active', t.dataset.style === S.style);
+  });
+  document.querySelectorAll('.voice-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.voice === S.voice);
+  });
+
+  // 跳到 step3 并展示结果区域骨架
+  showStep(3);
+  document.getElementById('step3Card').classList.add('hidden');
+
+  const savedResults = session.results || {};
+  const labels = session.tasks.map(t => t.label);
+
+  // 先把已知结果 (直链或已完成轮询) 渲染出来
+  const initialResults = session.tasks.map(t => {
+    if (t.direct && t.url) return { label: t.label, url: t.url };
+    if (savedResults[t.label]) return savedResults[t.label];
+    return { label: t.label, taskId: t.task_id, error: true };
+  });
+  displayResults(initialResults);
+
+  // 检查是否还有 pending 任务需要继续轮询
+  const pending = session.tasks.filter(t => !t.direct && !(savedResults[t.label] && savedResults[t.label].url));
+  if (pending.length === 0) return;
+
+  showStatus('🎵 检测到未完成的生成任务, 正在自动恢复...', 'info');
+  showLoading('🎵 正在恢复音乐生成...');
+  updateProgress(40, '云端任务仍在生成中, 继续查询...');
+
+  let recovered = 0, stillPending = 0;
+  for (const task of pending) {
+    try {
+      const r = await pollTask(task.task_id, task.label, (pct) => {
+        updateProgress(40 + pct * 0.5, `版本${task.label}制作中... ${Math.round(pct)}%`);
+      });
+      // 局部更新 DOM
+      const audio = document.getElementById(`audio${r.label}`);
+      if (audio) {
+        const download = document.getElementById(`download${r.label}`);
+        const labelEl = audio.parentElement.querySelector('.label');
+        audio.style.display = '';
+        if (download) {
+          download.style.display = '';
+          download.href = r.url;
+          download.download = `${S.songName || S.topic || '灵犀King'}_V${r.label}.mp3`;
+        }
+        if (labelEl) labelEl.textContent = `版本 ${r.label}`;
+        audio.src = r.url;
+        const shareBtn = document.getElementById(`shareBtn${r.label}`);
+        if (shareBtn) shareBtn.style.display = '';
+        const retryBtn = audio.parentElement.querySelector('button');
+        if (retryBtn) retryBtn.remove();
+      }
+      updateMusicSession({ results: { [r.label]: r } });
+      recovered++;
+    } catch (e) {
+      stillPending++;
+      // 仍未完成 - 保留 retry 按钮让用户稍后再点
+      console.warn('recover poll failed', task.label, e && e.message);
+    }
+  }
+
+  hideLoading();
+  if (recovered > 0) {
+    showStatus(`已恢复 ${recovered} 首歌曲结果`, 'success');
+  }
+  if (stillPending > 0) {
+    setTimeout(() => showStatus(`${stillPending} 首仍在云端生成中, 稍后点"重新查询"`, 'info'), 3200);
+  }
+  // 两个版本都还没拿到结果时, session 暂不清理; 用户可继续点 retry
+  const allDone = session.tasks.every(t => t.direct || (savedResults[t.label] && savedResults[t.label].url));
+  if (allDone && stillPending === 0) {
+    // 保留 session 30 分钟, 期间刷新仍可看到结果; 用户点"写一首新歌"时清理
+  }
+})();
 </script>
 
 <!-- 分享歌词底部面板 -->
