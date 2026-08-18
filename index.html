@@ -90,10 +90,8 @@ textarea.input-field{min-height:200px;resize:vertical;font-family:inherit;line-h
 .result-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;text-align:center}
 .result-card .label{font-size:13px;color:var(--text-dim);margin-bottom:12px}
 .result-card audio{width:100%;margin:8px 0}
-.result-card .download-btn{display:inline-block;margin-top:8px;padding:8px 20px;border-radius:8px;background:linear-gradient(135deg,#a855f7,#7c3aed);border:1px solid rgba(168,85,247,0.5);color:#fff;font-size:13px;cursor:pointer;text-decoration:none;transition:all .3s;box-shadow:0 2px 8px rgba(124,58,237,0.25)}
-.result-card .download-btn:hover{background:linear-gradient(135deg,#b866ff,#8b46f5);border-color:rgba(168,85,247,0.8);transform:translateY(-1px);box-shadow:0 4px 14px rgba(124,58,237,0.4)}
-.result-card .share-btn{display:inline-block;margin-top:8px;padding:8px 20px;border-radius:8px;background:linear-gradient(135deg,#06b6d4,#6366f1);border:1px solid rgba(99,102,241,0.5);color:#fff;font-size:13px;cursor:pointer;transition:all .3s;box-shadow:0 2px 8px rgba(99,102,241,0.25)}
-.result-card .share-btn:hover{background:linear-gradient(135deg,#22d3ee,#818cf8);transform:translateY(-1px);box-shadow:0 4px 14px rgba(99,102,241,0.4)}
+.result-card .download-btn{display:inline-block;margin-top:8px;padding:8px 20px;border-radius:8px;background:var(--card-hover);border:1px solid var(--border);color:var(--text);font-size:13px;cursor:pointer;text-decoration:none;transition:all .3s}
+.result-card .download-btn:hover{background:var(--purple);border-color:var(--purple)}
 
 /* Lyrics display */
 .lyrics-preview{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:16px;margin:12px 0;max-height:300px;overflow-y:auto;font-size:14px;line-height:2;white-space:pre-wrap}
@@ -185,9 +183,9 @@ textarea.input-field{min-height:200px;resize:vertical;font-family:inherit;line-h
     <div class="input-group">
       <label>音乐风格</label>
       <div class="style-grid" id="styleGrid">
-        <span class="style-tag active" data-style="pop" data-prompt="流行,任贤齐风格,阳光温暖,旋律朗朗上口,吉他流行,90年代华语流行,副歌记忆点强">🎵 流行</span>
-        <span class="style-tag" data-style="rock" data-prompt="摇滚,Beyond风格,汪峰风格,电吉他riff,鼓点有力,励志激昂,旋律性摇滚,副歌嘶吼感">🎸 摇滚</span>
-        <span class="style-tag" data-style="folk" data-prompt="民谣,赵雷风格,木吉他,温暖,真情实感,叙事性,诗意,城市民谣,口琴穿插">🪕 民谣</span>
+        <span class="style-tag active" data-style="pop" data-prompt="华语流行,90年代温暖抒情,旋律朗朗上口,深情动人,副歌记忆点强,简单好听,浪漫抒情,旋律独立成立,清唱也美,似曾相识的美">🎵 流行</span>
+        <span class="style-tag" data-style="rock" data-prompt="旋律摇滚,深情沙哑嗓音,主歌克制副歌爆发,旋律抓耳,旋律独立成立,清唱也美,有力量也有柔情,后劲型">🎸 摇滚</span>
+        <span class="style-tag" data-style="folk" data-prompt="中国城市民谣,赵雷式真诚叙事,温暖朴实,木吉他弹唱,口琴点缀,旋律简单干净,极简编曲,禁止R&B,禁止转音,禁止和声,禁止电子音效,禁止说唱,旋律独立成立,清唱也美,后劲型,似曾相识的美">🪕 民谣</span>
         <span class="style-tag" data-style="electronic" data-prompt="电子,合成器,律动感,现代制作">🎹 电子</span>
         <span class="style-tag" data-style="rnb" data-prompt="R&B,灵魂,律动,转音,深情">🎤 R&B</span>
         <span class="style-tag" data-style="country" data-prompt="乡村,清新,叙事,温暖,吉他">🤠 乡村</span>
@@ -201,6 +199,7 @@ textarea.input-field{min-height:200px;resize:vertical;font-family:inherit;line-h
         <span class="style-tag" data-style="indie" data-prompt="独立音乐,清新,独特,文艺,自然">🌿 独立</span>
         <span class="style-tag" data-style="reggae" data-prompt="雷鬼,轻松,律动,慵懒,阳光">🌴 雷鬼</span>
       </div>
+
     </div>
 
     <div class="btn-row">
@@ -275,14 +274,18 @@ textarea.input-field{min-height:200px;resize:vertical;font-family:inherit;line-h
     <div class="result-card fade-in">
       <div class="label">版本 A</div>
       <audio id="audioA" controls></audio>
-      <a class="download-btn" id="downloadA" download>下载 A</a>
-      <button id="shareBtnA" class="share-btn" onclick="shareAudio('A')" style="display:none">📤 分享 A</button>
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+        <a class="download-btn" id="downloadA" download>下载 A</a>
+        <button class="download-btn" id="shareBtnA" onclick="showAudioSharePanel('A')" style="display:none;-webkit-appearance:none;cursor:pointer;border:none;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;padding:8px 16px;border-radius:8px;font-size:13px">分享 A</button>
+      </div>
     </div>
     <div class="result-card fade-in">
       <div class="label">版本 B</div>
       <audio id="audioB" controls></audio>
-      <a class="download-btn" id="downloadB" download>下载 B</a>
-      <button id="shareBtnB" class="share-btn" onclick="shareAudio('B')" style="display:none">📤 分享 B</button>
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+        <a class="download-btn" id="downloadB" download>下载 B</a>
+        <button class="download-btn" id="shareBtnB" onclick="showAudioSharePanel('B')" style="display:none;-webkit-appearance:none;cursor:pointer;border:none;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;padding:8px 16px;border-radius:8px;font-size:13px">分享 B</button>
+      </div>
     </div>
   </div>
 
@@ -290,8 +293,8 @@ textarea.input-field{min-height:200px;resize:vertical;font-family:inherit;line-h
   <div class="result-card fade-in hidden" id="lyricsDownloadCard" style="text-align:center;margin-top:8px">
     <div class="label" style="margin-bottom:10px">📝 歌词</div>
     <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
-      <button class="download-btn" onclick="showSharePanel()" style="display:inline-block;cursor:pointer;border:none;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;padding:8px 16px;border-radius:8px;font-size:13px">📤 分享歌词</button>
-      <button class="download-btn" onclick="copyLyrics()" style="display:inline-block;cursor:pointer;border:none;background:rgba(255,255,255,0.08);color:var(--text);padding:8px 16px;border-radius:8px;font-size:13px;border:1px solid var(--border)">📋 复制歌词</button>
+      <button class="download-btn" onclick="showSharePanel()" style="display:inline-block;-webkit-appearance:none;cursor:pointer;border:none;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;padding:8px 16px;border-radius:8px;font-size:13px">📤 分享歌词</button>
+      <button class="download-btn" onclick="copyLyrics()" style="display:inline-block;-webkit-appearance:none;cursor:pointer;border:none;background:rgba(255,255,255,0.08);color:var(--text);padding:8px 16px;border-radius:8px;font-size:13px;border:1px solid var(--border)">📋 复制歌词</button>
       <a class="download-btn" id="downloadLyrics" download="歌词.txt" style="display:inline-block">💾 下载</a>
     </div>
   </div>
@@ -305,7 +308,7 @@ textarea.input-field{min-height:200px;resize:vertical;font-family:inherit;line-h
   <!-- Footer -->
   <div class="footer">
     <p>灵犀King · 突破阻力 助力梦想</p>
-    <p style="margin-top:4px"><a href="https://lingxiking.github.io/ai-write-v2/" target="_blank">AI写歌</a> · <a href="https://cm48fxz886.coze.site" target="_blank">AI导演</a> · <a href="https://yqctkk79yt.coze.site" target="_blank">AI OPC</a></p>
+    <p style="margin-top:4px"><a href="https://lingxiking.github.io/ai-write-v2/">AI写歌</a> · <a href="https://cm48fxz886.coze.site">AI导演</a> · <a href="https://yqctkk79yt.coze.site">AI OPC</a></p>
   </div>
 </div>
 
@@ -342,42 +345,6 @@ function saveState(step) {
       ts: Date.now()
     };
     localStorage.setItem('aiwrite_state', JSON.stringify(state));
-  } catch(e) {}
-}
-
-// ============ MUSIC SESSION (task_id) PERSISTENCE ============
-// 任务提交成功后立即落盘, 页面刷新/切换 App 回来后可恢复轮询, 避免重复生成.
-const MUSIC_SESSION_KEY = 'aiwrite_music_session';
-const MUSIC_SESSION_TTL = 30 * 60 * 1000; // 30 分钟内有效 (MiniMax 生成通常 30-180s)
-
-function saveMusicSession(session) {
-  try {
-    const data = Object.assign({ ts: Date.now(), results: {} }, session);
-    localStorage.setItem(MUSIC_SESSION_KEY, JSON.stringify(data));
-  } catch(e) { console.warn('saveMusicSession failed', e); }
-}
-function loadMusicSession() {
-  try {
-    const raw = localStorage.getItem(MUSIC_SESSION_KEY);
-    if (!raw) return null;
-    const data = JSON.parse(raw);
-    if (!data || !data.tasks || !data.tasks.length) return null;
-    if (Date.now() - (data.ts || 0) > MUSIC_SESSION_TTL) {
-      localStorage.removeItem(MUSIC_SESSION_KEY);
-      return null;
-    }
-    return data;
-  } catch(e) { return null; }
-}
-function clearMusicSession() {
-  try { localStorage.removeItem(MUSIC_SESSION_KEY); } catch(e) {}
-}
-function updateMusicSession(patch) {
-  try {
-    const cur = loadMusicSession() || { tasks: [], results: {}, ts: Date.now() };
-    const next = Object.assign({}, cur, patch);
-    next.results = Object.assign({}, cur.results || {}, patch.results || {});
-    localStorage.setItem(MUSIC_SESSION_KEY, JSON.stringify(next));
   } catch(e) {}
 }
 function restoreState() {
@@ -426,9 +393,9 @@ document.getElementById('apiKey').value = S.apiKey;
 document.getElementById('dsApiKey').value = S.dsApiKey;
 
 // ============ STYLE SELECTION ============
-document.querySelectorAll('.style-tag').forEach(tag => {
+document.querySelectorAll('#styleGrid .style-tag').forEach(tag => {
   tag.addEventListener('click', () => {
-    document.querySelectorAll('.style-tag').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('#styleGrid .style-tag').forEach(t => t.classList.remove('active'));
     tag.classList.add('active');
     S.style = tag.dataset.style;
     S.stylePrompt = tag.dataset.prompt;
@@ -528,7 +495,6 @@ function resetAll() {
   document.getElementById('resultPanel').classList.remove('show');
   document.getElementById('regenRow').classList.add('hidden');
   hideStatus();
-  clearMusicSession();
   showStep(1);
 }
 
@@ -541,6 +507,7 @@ const LYRICS_API = 'https://api.deepseek.com/chat/completions';
 const MUSIC_API = '';
 // CORS proxy for MiniMax if needed
 const CORS_PROXY = 'https://corsproxy.io/?';
+const CORS_PROXY2 = 'https://api.allorigins.win/raw?url=';
 
 // ============ LYRICS GENERATION (via Netlify Function or Direct) ============
 async function generateLyrics() {
@@ -566,74 +533,59 @@ async function generateLyrics() {
         metal: '金属', indie: '独立', reggae: '雷鬼'
       };
       
-      // ============== V4 创作方法论 ==============
-      const systemPrompt = `你是一位顶级华语音乐制作人 + 词作家，兼具方文山的文学性、林夕的哲思、李宗盛的叙事感和周杰伦团队的旋律直觉。你精通"V4 创作方法论"，所有作品必须严格遵循。
+      const systemPrompt = `你是一位顶级华语词作家，兼具方文山的文学性和林夕的哲思。你的歌词以画面感强、情感真挚、旋律性佳著称。
 
-【V4 方法论 · 五大铁律】
+创作核心原则：
+1. 真>技巧——写出普通人能感同身受的真实细节和情绪，不要华丽辞藻堆砌
+2. 矛盾张力——每首歌必须有内在矛盾（认命但不认输/甜但酸/自由但孤独），这是"真"的底层结构
+3. 主歌倾诉流+副歌四字锚——主歌用长句递进铺情绪，副歌用短句扎钉子制造记忆点
+4. 副歌必须朗朗上口——用四字结构做记忆锚点，让人听一遍就能跟着哼
+5. 歌词声调与旋律贴合——避免"倒字"，用词自然顺口，符合中文声调规律
+6. 后劲型hook——写出让听众"被击中"的hook，不是一次性惊艳，而是听完想循环、隔三差五想回来听
+7. 写给90%的普通人——写他们的认命但不认输，写他们知道很难但还是想试试的挣扎
+8. 避免陈词滥调——真诚、直接、有温度，一个大实话胜过一万句空洞抒情`;
 
-一、后劲型 Hook（Slow-burn Hook）
-- Hook 不是第一耳抓耳的廉价洗脑句，而是"听第二遍开始在脑中循环"的后劲型旋律句。
-- 位置：副歌首句 + 副歌末句必须是 Hook，首尾呼应形成闭环。
-- 构造：用"简单动机 + 微妙变化"——音程跳进不超过纯五度，节奏上留一个"迟疑半拍"的切分，让听众产生"差一点跟丢"的张力，解决时释放快感。
-- 禁忌：禁止用"啦啦啦""哦哦哦"等无意义音节充当 Hook；禁止直白口号（如"我们要勇敢"）。
-
-二、倾诉流 + 四字锚（Confessional Flow + 4-char Anchor）
-- 主歌采用"倾诉流"：像对一个人深夜说话，句子长短交替，呼吸感强，避免工整对仗。允许破句、允许口语化的"我是说""其实啊"等语气词（克制使用）。
-- 每 2-4 行必须嵌入一个"四字锚"：四个汉字组成的高密度意象词或情感判断词（如"人走茶凉""山高水长""于事无补""后会无期""一语成谶""庸人自扰"）。四字锚要像钉子一样钉在段落里，是听众记住的语义重心。
-- 四字锚不能堆砌，一段最多 1-2 个，出现位置在句末或句首重音位。
-
-三、旋律独立成立（Melody Stands Alone）
-- 歌词必须能"脱离编曲独立成立"：清唱副歌必须好听，旋律线条有起伏（高点在副歌第二或第三句），避免平铺直叙。
-- 声调贴合旋律（防"倒字"）：普通话四声的高低走向要与旋律走向大体一致。阴平（一声）配长音高音，去声（四声）配下行旋律，上声（三声）配低回转折。
-- 句尾设计：主歌句尾多用闭口元音（i/u）收住，制造压抑感；副歌句尾多用开口元音（a/ang/an）释放，便于合唱。
-- 副歌旋律节奏与主歌形成对比（主歌密、副歌宽，或反之）。
-
-四、编曲克制（Restrained Arrangement）
-- 歌词本身要为编曲留出空间——不要每一段都写满。Pre-Chorus 用短句、留白，让鼓组或贝斯有切入的空隙。
-- 结构上要有"空拍"：Bridge 后留 2-4 小节纯音乐/独白/喘息，最后一次副歌爆发。
-- 段落间情绪密度递增：Verse1 克制叙述 → Verse2 加入具体细节 → Pre-Chorus 句子变短、节奏变紧 → Chorus 全开。
-- 禁止：从头到尾情绪平铺；每段都是 4-6 行工整段落；没有任何留白。
-
-五、似曾相识的美（Familiar Beauty / Déjà-vu）
-- 追求"第一次听就觉得好像以前听过"的熟悉感，但不是抄袭——用经典和声进行（4536251、卡农、1645）承载全新旋律。
-- 意象要"具体但不陌生"：用所有人都见过但很少被写进歌的画面（便利店凌晨的灯、出租车后座的雨、删除键的犹豫、洗到褪色的 T 恤），而不是抽象的"梦想""自由""爱情"。
-- 情感要"克制中的汹涌"：不说"我好想你"，而写"你的杯子我还放在原位"。Show, don't tell。
-- 副歌要有一句"金句"——能被截图、被引用、被写进朋友圈那种。
-
-【输出要求】
-- 严格使用 [Intro]/[Verse]/[Pre-Chorus]/[Chorus]/[Bridge]/[Outro] 等结构标签。
-- 每个 [Verse] 至少包含 1 个四字锚，[Chorus] 包含 1 个后劲型 Hook 句（在该行末尾用 // 标注"// Hook"，最终会被前端剥离但供你自检）。
-- 语言：简体中文为主，可在必要处夹 1-2 个英文词（不强制）。
-- 不要解释，不要写"以下是歌词"，直接输出歌词本体。`;
-
-      const userPrompt = `请用 V4 方法论为以下主题创作一首完整的${styleMap[S.style] || '流行'}风格歌曲，目标时长 4 分钟左右。
+      const userPrompt = `请为以下主题创作一首完整的${styleMap[S.style] || '流行'}风格歌曲歌词，目标时长4分钟左右（标准流行歌曲长度）。
 
 主题：${topic}
-风格提示：${S.stylePrompt || ''}
-${S.refArtist ? '参考艺人：' + S.refArtist + '（仅做气质参考，不要抄袭其具体作品）' : ''}
 
-【结构要求】
-[Intro]     2-4 行（哼唱/场景提示/器乐描述，营造氛围）
-[Verse 1]   5-7 行（倾诉流开头，铺一个具体场景；必须含 1 个四字锚）
-[Pre-Chorus] 3-4 行（句子变短、节奏变紧，为副歌蓄力）
-[Chorus]    5-7 行（后劲型 Hook，首句和末句呼应；含 1 个四字锚；金句在此）
-[Verse 2]   5-7 行（推进叙事，新画面，不要重复 Verse 1；含 1 个四字锚）
-[Pre-Chorus] 3-4 行（可微调词，但保留旋律结构）
-[Chorus]    重复或小幅变奏
-[Bridge]    3-5 行（情感转折，视角切换或自我反问；可以更密或更空）
-[Chorus]    最后一次，最释放（可升调提示，如"// 升调"）
-[Outro]     2-3 行（意象回收，余韵，避免口号式收尾）
+要求：
+- 必须使用结构标签标注歌曲段落
+- 结构要求（确保歌曲达到4分钟）：
+  [Intro]（纯器乐前奏，2-3行乐器描述，如"木吉他缓缓响起"，禁止写任何哼唱、和声、oh oh、la la等人声内容）
+  [Verse 1]（4-6行，铺陈画面）
+  [Pre Chorus]（2-4行，情绪递进）
+  [Chorus]（4-6行，记忆点最强，重复2次）
+  [Verse 2]（4-6行，推进叙事，不要重复第一段）
+  [Chorus]（重复）
+  [Bridge]（2-4行，情感转折或升华）
+  [Chorus]（最后一次副歌，可以升调或变奏）
+  [Outro]（2-4行，余韵收尾）
+- 如果有特别洗脑的句子，用[Hook]标签标记
+- 每段4-8行，总歌词量要够撑起4分钟
+- 语言自然，适合演唱，避免生僻字和拗口表达
+- 副歌要有记忆点，让人听一遍就能跟着哼
+- 主题要有深度，不要停留在表面描写
 
-【自检清单】（创作时逐条对照）
-1. 副歌首尾是不是同一个 Hook 动机的呼应？
-2. 全词是否至少有 3 个四字锚？
-3. 清唱副歌是否能独立成立、有起伏高点？
-4. 是否有至少一处留白/空拍/短句？
-5. 有没有"具体但不陌生"的画面？至少 2 个。
-6. 副歌有没有一句能被截图的金句？
-7. 有没有用"啦啦啦/哦哦哦/梦想/自由"等偷懒表达？有则重写。
+只输出歌词内容，不要解释。格式示例：
+[Intro]
+（木吉他缓缓响起，口琴轻轻跟上）
 
-只输出歌词，不要任何解释或前缀。`;
+[Verse]
+歌词第一行
+歌词第二行
+歌词第三行
+歌词第四行
+
+[Pre Chorus]
+过渡句第一行
+过渡句第二行
+
+[Chorus]
+副歌第一行
+副歌第二行
+副歌第三行
+副歌第四行`;
 
       const dsBody = JSON.stringify({
         model: 'deepseek-chat',
@@ -686,10 +638,7 @@ ${S.refArtist ? '参考艺人：' + S.refArtist + '（仅做气质参考，不�
     }
     
     updateProgress(100, '歌词生成完成！');
-
-    // V4: 剥离 LLM 自检注释 (如 "// Hook" "// 升调"), 保留纯净歌词
-    lyrics = lyrics.replace(/\s*\/\/\s*(Hook|hook|升调|转调|蓄力|金句|四字锚).*$/gm, '').replace(/\n{3,}/g, '\n\n').trim();
-
+    
     document.getElementById('lyricsEditor').value = lyrics;
     S.lyrics = lyrics;
     
@@ -758,9 +707,9 @@ async function generateSongs() {
   
   // Style-specific vocal descriptions (key to matching overall feel)
   const styleVoice = {
-    pop: S.voice === 'male' ? '任贤齐风格流行男歌手,阳光温暖,音色干净清亮,中音区扎实,副歌略带鼻音的辨识度,90年代华语情歌质感,旋律感强,不要过度转音' : '流行女歌手,甜美嗓音,高音清亮,情感细腻',
-    rock: S.voice === 'male' ? '摇滚男歌手,汪峰式沙哑烟嗓与Beyond式清亮励志唱腔融合,嘶吼有力,中高音扎实,现场感强,副歌有呐喊感' : '摇滚女歌手,高亢有力,爆发力强,略带沙哑',
-    folk: S.voice === 'male' ? '赵雷风民谣男歌手,朴素吟唱,嗓音低沉温暖,像在深夜自弹自唱,咬字清晰有叙事感,禁止转音,禁止尾音炫技,句尾自然收住不拖长' : '民谣女歌手,清澈嗓音,轻声细语,像在耳边说悄悄话,禁止转音,禁止尾音花哨,质朴自然不加修饰',
+    pop: S.voice === 'male' ? '流行男歌手,清亮嗓音,旋律感强,副歌爆发力' : '流行女歌手,甜美嗓音,高音清亮,情感细腻',
+    rock: S.voice === 'male' ? '摇滚男歌手,深情沙哑,主歌克制副歌爆发,带刺的烟嗓,旋律感强,有力量也有柔情' : '摇滚女歌手,高亢有力,爆发力强,略带沙哑,旋律激昂',
+    folk: S.voice === 'male' ? '中国民谣男歌手,朴素吟唱,嗓音低沉温暖,像在深夜自弹自唱,像赵雷一样真诚直白,禁止转音,禁止尾音炫技,禁止和声,禁止R&B唱腔,句尾自然收住不拖长,旋律简单不花哨' : '民谣女歌手,清澈嗓音,轻声细语,像在耳边说悄悄话,禁止转音,禁止尾音花哨,禁止和声,质朴自然不加修饰',
     electronic: S.voice === 'male' ? '电子男歌手,迷幻嗓音,效果器处理,未来感' : '电子女歌手,空灵嗓音,飘渺感,带效果器',
     rnb: S.voice === 'male' ? 'R&B男歌手,转音丝滑,律动感强,深情低吟' : 'R&B女歌手,转音丰富,磁性嗓音,性感慵懒',
     country: S.voice === 'male' ? '乡村男歌手,质朴嗓音,叙事感强,阳光温暖' : '乡村女歌手,清新嗓音,甜美自然,像阳光般温暖',
@@ -778,9 +727,9 @@ async function generateSongs() {
   
   // Style-specific arrangement hints (Chinese for better MiniMax understanding)
   const styleArrangement = {
-    pop: ['任贤齐风格流行编曲,干净的木吉他扫弦与电吉他分解,温暖的贝斯线,90年代华语情歌鼓点,副歌弦乐铺底,阳光真诚,旋律朗朗上口,记忆点强', '流行情歌编曲,钢琴前奏,木吉他与轻打击乐交织,任贤齐式温暖叙事感,副歌和声叠加,情绪饱满但不炫技'],
-    rock: ['Beyond风格摇滚编曲,黄家驹式电吉他solo与分解和弦,铿锵有力的鼓点,励志主旋律,汪峰式弦乐铺底增强厚度,副歌大合唱感,间奏吉他solo', '华语流行摇滚,失真电吉他riff驱动,贝斯线条厚重,汪峰式民谣摇滚质感,Beyond式旋律性副歌,鼓点稳健有力,情绪层层推进'],
-    folk: ['赵雷风城市民谣编曲,木吉他弹唱为主,口琴穿插,朴素温暖,像在深夜讲故事,间奏口琴solo,不要花哨编曲,不要弦乐,手鼓或卡洪鼓轻打节奏', '独立民谣,木吉他指弹,口琴呼应,赵雷风格,低沉嗓音,情感克制内敛,间奏口琴或吉他solo,编曲简洁有层次,偶尔加入曼陀铃点缀'],
+    pop: ['华语流行编曲,90年代经典风格,温暖深情,旋律朗朗上口,副歌记忆点强,编曲精致', '流行抒情编曲,层次递进,弦乐铺底,副歌情感饱满,旋律简单好听,浪漫温暖'],
+    rock: ['旋律摇滚编曲,电吉他riff驱动,主歌克制铺垫副歌爆发,旋律抓耳,深情沙哑,吉他solo激昂,励志热血,副歌朗朗上口有力量', '港式摇滚编曲,经典吉他solo,前奏旋律引入,副歌激昂热血,鼓点有力但不压旋律,情怀感,旋律激昂动听'],
+    folk: ['中国民谣编曲,极简木吉他弹唱为主,口琴穿插,赵雷式真诚,旋律简单朴实,禁止R&B,禁止转音,禁止和声,禁止电子音效,禁止鼓机,不要花哨编曲,旋律独立成立,清唱也美,后劲型', '中国城市民谣,木吉他指弹开场,温暖朴实男声,故事感歌词,副歌四字锚记忆点强,编曲极度克制,仅吉他与人声,禁止和声,禁止R&B元素,禁止电子音色,旋律独立成立,情感真挚不矫情'],
     electronic: ['电子编曲,合成器铺底,节拍律动强,drops设计感,氛围感', '电子编曲,琶音器开场,渐进式build-up,副歌drop爆发'],
     rnb: ['R&B编曲,律动鼓点,贝斯线条流畅,转音空间大,深情演绎', 'Neo-Soul风格,钢琴和弦,慵懒律动,和声丰富,副歌情感爆发'],
     country: ['乡村编曲,木吉他扫弦,班卓琴点缀,叙事感强,阳光温暖', '乡村民谣,口琴开场,吉他伴奏,像公路旅行般自由,副歌旋律优美'],
@@ -797,16 +746,15 @@ async function generateSongs() {
   
   const arr = styleArrangement[S.style] || styleArrangement.pop;
   
-  // Two versions with different arrangement approaches (V4 方法论: 编曲克制 + 旋律独立成立 + 似曾相识的美)
-  const v4MusicDNA = '后劲型hook,副歌首末句动机呼应,旋律线条独立成立,清唱也好听,高点在副歌第二或第三句,主歌密副歌宽形成对比,编曲克制留白,Pre-Chorus短句蓄力,Bridge后空拍再爆发,经典和声进行(4536251或卡农),似曾相识的美,专业制作,高质量母带';
+  // Two versions with different arrangement approaches
   const versions = [
     {
       name: 'A',
-      prompt: `${S.stylePrompt}, ${voiceDesc}, ${arr[0]}, ${v4MusicDNA}, 完整歌曲结构,4分钟左右`
+      prompt: `${S.stylePrompt}, ${voiceDesc}, ${arr[0]}, 完整歌曲结构,4分钟左右,专业制作水准,旋律独立成立清唱也美,后劲型hook,似曾相识的美,高质量母带`
     },
     {
       name: 'B',
-      prompt: `${S.stylePrompt}, ${voiceDesc}, ${arr[1]}, ${v4MusicDNA}, 完整歌曲结构,4分钟左右`
+      prompt: `${S.stylePrompt}, ${voiceDesc}, ${arr[1]}, 完整歌曲结构,4分钟左右,专业制作水准,旋律独立成立清唱也美,后劲型hook,似曾相识的美,高质量母带`
     }
   ];
   
@@ -845,15 +793,21 @@ async function generateSongs() {
               method: 'POST', headers: headers, body: miniMaxBody
             });
           } catch(corsErr) {
-            // CORS blocked, use proxy
+            // CORS blocked, try proxy chain
             try {
               resp = await fetch(CORS_PROXY + 'https://api.minimaxi.com/v1/music_generation', {
                 method: 'POST', headers: headers, body: miniMaxBody
               });
             } catch(proxyErr) {
-              console.error('[MiniMax] Proxy error:', proxyErr);
-              resp = null;
-              continue;
+              try {
+                resp = await fetch(CORS_PROXY2 + 'https://api.minimaxi.com/v1/music_generation', {
+                  method: 'POST', headers: headers, body: miniMaxBody
+                });
+              } catch(proxyErr2) {
+                console.error('[MiniMax] Proxy2 error:', proxyErr2);
+                resp = null;
+                continue;
+              }
             }
           }
           // If response is OK or not a server error (5xx), break retry loop
@@ -936,24 +890,9 @@ async function generateSongs() {
     // Show friendly message: can switch to other apps
     const taskIds = tasks.filter(t => !t.direct).map(t => t.task_id);
     window._pendingTaskIds = taskIds; // Save for retry
+    // 保存到localStorage，切走页面后也能恢复
+    try { localStorage.setItem('aiwrite_pending_tasks', JSON.stringify(tasks.filter(t => !t.direct).map(t => ({taskId: t.task_id, label: t.label})))); } catch(e) {}
     updateProgress(20, '🎵 音乐正在云端生成中，可以切到其他app，3分钟后回来看结果');
-
-    // [v4 恢复机制] 提交成功立刻把 task_id 与当前歌曲元信息写入 localStorage,
-    // 即使页面刷新/切 App/WebView 回收, 回来仍能继续轮询, 不需要重新生成.
-    const sessionSnapshot = {
-      tasks: tasks.map(t => t.direct
-        ? { direct: true, url: t.url, label: t.label }
-        : { direct: false, task_id: t.task_id, label: t.label }),
-      meta: {
-        topic: S.topic, songName: S.songName, lyrics: S.lyrics,
-        style: S.style, stylePrompt: S.stylePrompt, voice: S.voice
-      },
-      results: {}
-    };
-    tasks.forEach(t => {
-      if (t.direct) sessionSnapshot.results[t.label] = { url: t.url, label: t.label };
-    });
-    saveMusicSession(sessionSnapshot);
     
     // Poll tasks that need polling
     const results = [];
@@ -966,20 +905,17 @@ async function generateSongs() {
             updateProgress(20 + pct * 0.7, `版本${task.label}制作中... ${Math.round(pct)}%`);
           });
           results.push(result);
-          // 单条完成立即持久化, 避免下一条轮询中页面被关掉丢失结果
-          updateMusicSession({ results: { [task.label]: result } });
         } catch (pollErr) {
           // Polling timed out - save task_id for retry
           results.push({ label: task.label, taskId: task.task_id, error: true });
-          updateMusicSession({ results: { [task.label]: { label: task.label, taskId: task.task_id, error: true } } });
         }
       }
     }
     
     updateProgress(100, '生成完成！');
-
-    // 所有任务结束 (含部分超时) 后保留 session 用于"重新查询",
-    // 只有用户点"写一首新歌"时才真正 clearMusicSession.
+    // 生成完成，清除待查任务
+    try { localStorage.removeItem('aiwrite_pending_tasks'); } catch(e) {}
+    
     setTimeout(() => {
       hideLoading();
       displayResults(results);
@@ -993,6 +929,8 @@ async function generateSongs() {
     hideLoading();
     showStatus('歌曲生成失败: ' + err.message, 'error');
     console.error(err);
+    // 提交失败时清除待查任务
+    try { localStorage.removeItem('aiwrite_pending_tasks'); } catch(e) {}
   } finally {
     btn.disabled = false;
   }
@@ -1047,255 +985,332 @@ async function pollTask(taskId, label, onProgress) {
 
 // ============ LYRICS SHARE/COPY ============
 function showSharePanel() {
-  const sheet = document.getElementById('shareSheet');
-  if (sheet) sheet.classList.remove('hidden');
-}
-
-function copyLyrics() {
-  const sheet = document.getElementById('shareSheet');
-  if (sheet) sheet.classList.add('hidden');
-  const topic = S.topic || '灵犀King·AI写歌';
-  const text = `【${topic}】\n\n${S.lyrics}\n\n—— 灵犀King·AI写歌\nhttps://lingxiking.github.io/ai-write-v2/`;
-  copyToClipboard(text);
-}
-
-async function shareAudio(label) {
-  const audioEl = document.getElementById('audio' + label);
-  const songMeta = S['result' + label];
-  const url = audioEl ? audioEl.src : (songMeta && (songMeta.audioUrl || songMeta.audio_url));
-  if (!url) { showStatus('暂无可分享的音频', 'error'); return; }
-  const name = (S.songName || S.topic || '灵犀King') + '-' + label;
-  try {
-    showStatus('正在准备音频文件...', 'info');
-    const resp = await fetch(url);
-    if (!resp.ok) throw new Error('音频下载失败');
-    const blob = await resp.blob();
-    const ext = (blob.type && blob.type.includes('mp3')) ? 'mp3' : 'mp3';
-    const file = new File([blob], name + '.' + ext, { type: blob.type || 'audio/mpeg' });
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({ files: [file], title: name, text: name });
-    } else if (navigator.share) {
-      await navigator.share({ title: name, text: name + '\n' + url });
-    } else {
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = name + '.' + ext;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-    }
-    showStatus('已分享 ' + label, 'success');
-  } catch (e) {
-    if (e && e.name === 'AbortError') return;
-    showStatus('分享失败: ' + (e && e.message || e), 'error');
+  const topic = S.topic || S.songName || '灵犀King·AI写歌';
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:10000;display:flex;align-items:flex-end;justify-content:center';
+  modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
+  
+  const panel = document.createElement('div');
+  panel.style.cssText = 'background:#1a1a2e;border-radius:20px 20px 0 0;padding:30px 24px 40px;width:100%;max-width:480px;animation:slideUp .3s ease';
+  panel.innerHTML = `
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="width:36px;height:4px;background:rgba(255,255,255,0.3);border-radius:2px;margin:0 auto"></div>
+      <div style="color:#fff;font-size:18px;font-weight:bold;margin-top:16px">分享歌词</div>
+      <div style="color:rgba(255,255,255,0.5);font-size:13px;margin-top:4px">《${topic}》</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div onclick="handleShareImage()" style="display:flex;align-items:center;gap:14px;padding:16px;background:rgba(124,58,237,0.15);border:1px solid rgba(124,58,237,0.3);border-radius:12px;cursor:pointer">
+        <div style="font-size:28px">️</div>
+        <div>
+          <div style="color:#fff;font-size:15px;font-weight:bold">生成歌词海报</div>
+          <div style="color:rgba(255,255,255,0.5);font-size:12px">精美卡片 · 长按保存 · 发朋友圈</div>
+        </div>
+      </div>
+      <div onclick="handleShareText()" style="display:flex;align-items:center;gap:14px;padding:16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;cursor:pointer">
+        <div style="font-size:28px"></div>
+        <div>
+          <div style="color:#fff;font-size:15px;font-weight:bold">复制歌词文字</div>
+          <div style="color:rgba(255,255,255,0.5);font-size:12px">纯文本 · 粘贴到微信聊天</div>
+        </div>
+      </div>
+    </div>
+    <button onclick="this.parentElement.parentElement.remove()" style="margin-top:16px;width:100%;padding:14px;border-radius:12px;border:none;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);font-size:14px;cursor:pointer">取消</button>
+  `;
+  
+  // Add slide-up animation
+  if (!document.getElementById('sharePanelStyle')) {
+    const style = document.createElement('style');
+    style.id = 'sharePanelStyle';
+    style.textContent = '@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}';
+    document.head.appendChild(style);
   }
+  
+  modal.appendChild(panel);
+  document.body.appendChild(modal);
+}
+
+function handleShareImage() {
+  document.querySelectorAll('[style*="z-index:10000"]').forEach(el => el.remove());
+  shareLyrics();
+}
+
+function handleShareText() {
+  document.querySelectorAll('[style*="z-index:10000"]').forEach(el => el.remove());
+  copyLyrics();
 }
 
 function shareLyrics() {
-  const sheet = document.getElementById('shareSheet');
-  if (sheet) sheet.classList.add('hidden');
-  const topic = S.topic || '灵犀King·AI写歌';
+  const topic = S.topic || S.songName || '灵犀King·AI写歌';
   const lyrics = S.lyrics || '';
+  
+  // Generate lyrics card image using Canvas, then show directly
+  generateLyricsCard(topic, lyrics, (canvas) => {
+    showSaveLyricsImage(canvas, topic);
+  });
+}
 
-  // ---------- 1. 先测量歌词实际占用高度, 动态决定 canvas 高度, 保证完整渲染不截断 ----------
-  const cw = 1080;
-  const measure = document.createElement('canvas').getContext('2d');
-  const fBody = '42px -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif';
-  const fSection = 'bold 40px -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif';
-  const maxWidth = cw - 160;
-  const lineHeightBody = 68;
-  const lineHeightSection = 80;
-  const sectionRe = /^\s*[\[【](?:verse|chorus|bridge|intro|outro|pre-chorus|hook|副歌|主歌|桥段|前奏|尾奏|间奏)[^\]】]*[\]】]\s*$/i;
-
-  function wrapLine(ctx, line, font) {
-    ctx.font = font;
-    if (!line) return [{ text: '', section: false }];
-    const out = [];
-    if (sectionRe.test(line)) {
-      out.push({ text: line.replace(/^\s*[\[【|]\s*|\s*[\]】|]\s*$/g, ''), section: true });
-      return out;
-    }
-    let cur = '';
-    for (const c of line) {
-      const test = cur + c;
-      if (ctx.measureText(test).width > maxWidth) { out.push({ text: cur, section: false }); cur = c; }
-      else cur = test;
-    }
-    if (cur) out.push({ text: cur, section: false });
-    return out;
-  }
-
-  const rawLines = lyrics.split('\n');
-  const wrapped = [];
-  for (const raw of rawLines) {
-    const isSection = sectionRe.test(raw);
-    const parts = wrapLine(measure, raw, isSection ? fSection : fBody);
-    for (const p of parts) wrapped.push(p);
-  }
-  let lyricsHeight = 40; // 顶部额外留白
-  for (const w of wrapped) {
-    lyricsHeight += w.section ? lineHeightSection : lineHeightBody;
-  }
-  lyricsHeight += 40; // 底部额外留白
-
-  // 顶部固定区 (品牌+副标题+分隔线+标题) ≈ 440; 底部 footer ≈ 280
-  const topFixed = 440;
-  const footerH = 290;
-  const minH = 1920;
-  const ch = Math.max(minH, topFixed + lyricsHeight + footerH);
-
-  // ---------- 2. 真正绘制 ----------
+function generateLyricsCard(topic, lyrics, callback) {
   const canvas = document.createElement('canvas');
-  canvas.width = cw; canvas.height = ch;
   const ctx = canvas.getContext('2d');
-  // 背景渐变
-  const grad = ctx.createLinearGradient(0, 0, cw, ch);
-  grad.addColorStop(0, '#1a1035');
-  grad.addColorStop(1, '#0a0a0f');
-  ctx.fillStyle = grad; ctx.fillRect(0, 0, cw, ch);
-  // 装饰光斑
-  const rg = ctx.createRadialGradient(cw*0.8, 200, 0, cw*0.8, 200, 500);
-  rg.addColorStop(0, 'rgba(139,92,246,0.35)');
-  rg.addColorStop(1, 'rgba(139,92,246,0)');
-  ctx.fillStyle = rg; ctx.fillRect(0, 0, cw, ch);
-  const rg2 = ctx.createRadialGradient(cw*0.15, ch*0.85, 0, cw*0.15, ch*0.85, 500);
-  rg2.addColorStop(0, 'rgba(6,182,212,0.25)');
-  rg2.addColorStop(1, 'rgba(6,182,212,0)');
-  ctx.fillStyle = rg2; ctx.fillRect(0, 0, cw, ch);
-
-  // 顶部品牌区
-  ctx.fillStyle = '#8b5cf6';
-  ctx.font = 'bold 52px -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif';
-  ctx.fillText('灵犀King · AI写歌', 80, 150);
-  ctx.fillStyle = '#94a3b8';
-  ctx.font = '28px -apple-system, "PingFang SC", sans-serif';
-  ctx.fillText('AI 为你创作专属原创歌曲', 80, 198);
-  ctx.strokeStyle = 'rgba(139,92,246,0.4)'; ctx.lineWidth = 2;
-  ctx.beginPath(); ctx.moveTo(80, 240); ctx.lineTo(cw-80, 240); ctx.stroke();
-
-  // 标题
-  ctx.fillStyle = '#fff';
-  ctx.font = 'bold 84px -apple-system, "PingFang SC", sans-serif';
-  ctx.fillText(topic, 80, 370);
-
-  // 歌词逐行绘制
-  let y = 470;
-  for (const w of wrapped) {
-    if (w.section) {
-      // 章节标题: 紫色加粗, 带左侧小色条
-      ctx.fillStyle = '#a855f7';
-      ctx.font = fSection;
-      ctx.fillRect(80, y - 44, 8, 48);
-      ctx.fillText(w.text.toUpperCase(), 104, y);
-      y += lineHeightSection;
+  
+  // Card dimensions
+  const width = 750;
+  const padding = 60;
+  const titleLineHeight = 50;
+  const sectionLineHeight = 36;
+  const sectionGap = 16;
+  
+  // Prepare lyrics lines (wrap long lines)
+  const maxLineWidth = width - padding * 2;
+  const rawLines = lyrics.split('\n').filter(l => l.trim());
+  const wrappedLines = [];
+  
+  // Measure text helper
+  ctx.font = '28px -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif';
+  
+  for (const line of rawLines) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    
+    // Check if line fits
+    const metrics = ctx.measureText(trimmed);
+    if (metrics.width <= maxLineWidth) {
+      wrappedLines.push(trimmed);
     } else {
-      ctx.fillStyle = '#e2e8f0';
-      ctx.font = fBody;
-      ctx.fillText(w.text, 80, y);
-      y += lineHeightBody;
+      // Wrap long lines
+      let current = '';
+      for (const char of trimmed) {
+        const test = current + char;
+        if (ctx.measureText(test).width > maxLineWidth) {
+          wrappedLines.push(current);
+          current = char;
+        } else {
+          current = test;
+        }
+      }
+      if (current) wrappedLines.push(current);
     }
   }
+  
+  // Calculate height - count section headers for extra spacing
+  const titleHeight = 80;
+  const sectionHeaders = wrappedLines.filter(l => l.startsWith('[') && l.endsWith(']')).length;
+  const lyricsHeight = wrappedLines.length * sectionLineHeight + (sectionHeaders * sectionGap) + 40;
+  const brandHeight = 140;
+  const height = padding + titleHeight + lyricsHeight + brandHeight + padding;
+  
+  canvas.width = width;
+  canvas.height = height;
+  
+  // Background gradient
+  const grad = ctx.createLinearGradient(0, 0, 0, height);
+  grad.addColorStop(0, '#0f0c29');
+  grad.addColorStop(0.5, '#1a1a2e');
+  grad.addColorStop(1, '#16213e');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, width, height);
+  
+  // Decorative top accent line
+  const accentGrad = ctx.createLinearGradient(padding, 0, width - padding, 0);
+  accentGrad.addColorStop(0, '#7c3aed');
+  accentGrad.addColorStop(0.5, '#a78bfa');
+  accentGrad.addColorStop(1, '#7c3aed');
+  ctx.fillStyle = accentGrad;
+  ctx.fillRect(padding, padding - 10, width - padding * 2, 3);
+  
+  // Title
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 40px -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif';
+  ctx.fillText(`《${topic}》`, padding, padding + 50);
+  
+  // Lyrics - render all lines with section styling
+  ctx.font = '28px -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif';
+  let y = padding + titleHeight + 30;
+  for (const line of wrappedLines) {
+    // Section headers get special styling
+    if (line.startsWith('[') && line.endsWith(']')) {
+      ctx.fillStyle = '#a78bfa';
+      ctx.font = 'bold 26px -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif';
+      ctx.fillText(line, padding, y);
+      y += sectionLineHeight + sectionGap;
+      ctx.fillStyle = '#e0e0e0';
+      ctx.font = '28px -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif';
+    } else {
+      ctx.fillStyle = '#e0e0e0';
+      ctx.fillText(line, padding, y);
+      y += sectionLineHeight;
+    }
+  }
+  
+  // Divider before brand
+  ctx.fillStyle = 'rgba(124, 58, 237, 0.5)';
+  ctx.fillRect(padding, height - brandHeight - 20, width - padding * 2, 1);
+  
+  // Brand
+  ctx.fillStyle = '#a78bfa';
+  ctx.font = 'bold 26px -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif';
+  ctx.fillText('灵犀King·AI写歌', padding, height - brandHeight + 30);
+  
+  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  ctx.font = '22px -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif';
+  ctx.fillText('突破阻力 助力梦想', padding, height - brandHeight + 65);
+  
+  ctx.fillStyle = 'rgba(255,255,255,0.4)';
+  ctx.font = '18px -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif';
+  ctx.fillText('🌐 打开链接体验 →', padding, height - brandHeight + 100);
+  
+  ctx.fillStyle = 'rgba(255,255,255,0.6)';
+  ctx.font = '20px -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif';
+  ctx.fillText('lingxiking.github.io/ai-write-v2', padding, height - brandHeight + 130);
+  
+  callback(canvas);
+}
 
-  // 底部信息 (固定在 canvas 最底部)
-  const footerY = ch - 200;
-  ctx.strokeStyle = 'rgba(139,92,246,0.25)'; ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(80, footerY - 30); ctx.lineTo(cw-80, footerY - 30); ctx.stroke();
-  ctx.fillStyle = '#06b6d4';
-  ctx.font = 'bold 28px -apple-system, "PingFang SC", sans-serif';
-  ctx.fillText('▸ 打开链接, 体验 AI 写歌', 80, footerY + 20);
-  ctx.fillStyle = '#8b5cf6';
-  ctx.font = 'bold 38px -apple-system, sans-serif';
-  ctx.fillText('lingxiking.github.io/ai-write-v2', 80, footerY + 80);
-  ctx.fillStyle = 'rgba(148,163,184,0.7)';
-  ctx.font = '24px -apple-system, "PingFang SC", sans-serif';
-  ctx.fillText('输入主题, 30 秒生成你的专属原创歌曲', 80, footerY + 125);
-
-  // ---------- 3. 输出到弹窗 (仅预览, 不跳页) ----------
-  const modal = document.getElementById('posterModal');
-  const img = document.getElementById('posterImg');
+function showSaveLyricsImage(canvas, topic) {
   const dataUrl = canvas.toDataURL('image/png');
-  // 缓存 dataUrl 给 savePoster 使用, 避免再从 img.src fetch data URL 失败
-  window.__posterDataUrl = dataUrl;
-  if (modal && img) {
-    img.src = dataUrl;
-    modal.classList.remove('hidden');
-    const hint = document.getElementById('posterHint');
-    if (hint) hint.style.display = /iphone|ipad|ipod/i.test(navigator.userAgent) ? 'block' : 'none';
-  } else {
-    const a = document.createElement('a');
-    a.href = dataUrl;
-    a.download = topic + '-海报.png';
-    a.rel = 'noopener';
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  }
+  
+  // Remove any existing poster modal
+  document.querySelectorAll('.lyrics-poster-modal').forEach(el => el.remove());
+  
+  const modal = document.createElement('div');
+  modal.className = 'lyrics-poster-modal';
+  modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;';
+  modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
+  
+  // Title bar
+  const titleBar = document.createElement('div');
+  titleBar.style.cssText = 'color:#fff;font-size:14px;margin-bottom:12px;text-align:center;flex-shrink:0;';
+  titleBar.textContent = '《' + topic + '》歌词海报';
+  
+  // Hint text
+  const hintText = document.createElement('div');
+  hintText.style.cssText = 'color:rgba(255,255,255,0.6);font-size:12px;margin-bottom:16px;text-align:center;flex-shrink:0;';
+  hintText.textContent = '点击下方按钮保存完整海报';
+  
+  // Image container - scrollable if too tall
+  const imgWrap = document.createElement('div');
+  imgWrap.style.cssText = 'flex:1;overflow-y:auto;max-width:95%;-webkit-overflow-scrolling:touch;';
+  const img = document.createElement('img');
+  img.src = dataUrl;
+  img.style.cssText = 'max-width:100%;border-radius:12px;box-shadow:0 8px 32px rgba(124,58,237,0.4);display:block;margin:0 auto;';
+  imgWrap.appendChild(img);
+  
+  // Buttons
+  const btnRow = document.createElement('div');
+  btnRow.style.cssText = 'margin-top:16px;display:flex;gap:12px;flex-shrink:0;padding-bottom:20px;';
+  
+  const saveBtn = document.createElement('button');
+  saveBtn.textContent = ' 保存海报到相册';
+  saveBtn.style.cssText = '-webkit-appearance:none;padding:14px 32px;border-radius:10px;border:none;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;font-size:15px;font-weight:600;cursor:pointer;';
+  saveBtn.onclick = function() {
+    // Convert to blob for better iOS compatibility
+    canvas.toBlob(function(blob) {
+      if (!blob) {
+        // Fallback to data URL
+        const a = document.createElement('a');
+        a.href = dataUrl;
+        a.download = topic + '_歌词.png';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        return;
+      }
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = topic + '_歌词.png';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }, 'image/png');
+  };
+  
+  const closeBtn = document.createElement('button');
+  closeBtn.textContent = '关闭';
+  closeBtn.style.cssText = '-webkit-appearance:none;padding:14px 28px;border-radius:10px;border:1px solid rgba(255,255,255,0.2);background:transparent;color:#fff;font-size:14px;cursor:pointer;';
+  closeBtn.onclick = function() { modal.remove(); };
+  
+  btnRow.appendChild(saveBtn);
+  btnRow.appendChild(closeBtn);
+  
+  modal.appendChild(titleBar);
+  modal.appendChild(hintText);
+  modal.appendChild(imgWrap);
+  modal.appendChild(btnRow);
+  document.body.appendChild(modal);
 }
 
-function closePosterModal() {
-  const modal = document.getElementById('posterModal');
-  if (modal) modal.classList.add('hidden');
+function downloadLyricsCard(dataUrl, topic) {
+  const a = document.createElement('a');
+  a.href = dataUrl;
+  a.download = `${topic}_歌词.png`;
+  a.click();
 }
 
-async function savePoster() {
-  const img = document.getElementById('posterImg');
-  const dataUrl = window.__posterDataUrl || (img && img.src);
-  if (!dataUrl) return;
-  const topic = S.topic || '灵犀King·AI写歌';
-  const fname = topic + '-海报.png';
+function copyLyrics() {
+  const text = `【${S.topic || '灵犀King·AI写歌'}】\n\n${S.lyrics}`;
+  copyToClipboard(text);
+  showStatus('歌词已复制到剪贴板', 'success');
+}
 
-  // 统一把 data URL 转成 Blob, 再走下载/分享 (blob 方式最稳)
-  let blob;
-  try {
-    if (dataUrl.startsWith('data:')) {
-      blob = dataUrlToBlob(dataUrl);
-    } else {
-      const resp = await fetch(dataUrl);
-      blob = await resp.blob();
-    }
-  } catch (e) {
-    showStatus('图片生成失败, 请重试', 'error');
+function showAudioSharePanel(label) {
+  const displayName = S.songName || S.topic || '灵犀King';
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:10000;display:flex;align-items:flex-end;justify-content:center';
+  modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
+  
+  const panel = document.createElement('div');
+  panel.style.cssText = 'background:#1a1a2e;border-radius:20px 20px 0 0;padding:30px 24px 40px;width:100%;max-width:480px;animation:slideUp .3s ease';
+  panel.innerHTML = `
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="width:36px;height:4px;background:rgba(255,255,255,0.3);border-radius:2px;margin:0 auto"></div>
+      <div style="color:#fff;font-size:18px;font-weight:bold;margin-top:16px">分享音频</div>
+      <div style="color:rgba(255,255,255,0.5);font-size:13px;margin-top:4px">《${displayName}》版本 ${label}</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div onclick="doShareAudio('${label}');this.closest('[style*=fixed]').remove()" style="display:flex;align-items:center;gap:14px;padding:16px;background:rgba(124,58,237,0.15);border:1px solid rgba(124,58,237,0.3);border-radius:12px;cursor:pointer">
+        <div style="font-size:28px">🎵</div>
+        <div>
+          <div style="color:#fff;font-size:15px;font-weight:bold">分享到微信/朋友</div>
+          <div style="color:rgba(255,255,255,0.5);font-size:12px">发送MP3文件 · 直接播放</div>
+        </div>
+      </div>
+    </div>
+    <button onclick="this.parentElement.parentElement.remove()" style="margin-top:16px;width:100%;padding:14px;border-radius:12px;border:none;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);font-size:14px;cursor:pointer">取消</button>
+  `;
+  modal.appendChild(panel);
+  document.body.appendChild(modal);
+}
+
+function doShareAudio(label) {
+  const audio = document.getElementById(`audio${label}`);
+  const displayName = S.songName || S.topic || '灵犀King';
+  const filename = `${displayName}_版本${label}.mp3`;
+  const audioUrl = audio.src;
+  if (!audioUrl) {
+    showStatus(`版本${label}音频地址无效`, 'error');
     return;
   }
-
-  // 1. iOS / 支持 Web Share 的设备: 调系统分享 (可"存储图像")
-  try {
-    const file = new File([blob], fname, { type: blob.type || 'image/png' });
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({ files: [file], title: topic + ' - 歌词海报' });
-      return;
-    }
-  } catch (e) {
-    if (e && e.name === 'AbortError') return;
-  }
-
-  // 2. 其他浏览器: blob URL + <a download> (比直接用 data URL 更可靠)
-  try {
-    const blobUrl = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = blobUrl;
-    a.download = fname;
-    a.rel = 'noopener';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(() => URL.revokeObjectURL(blobUrl), 1500);
-    if (/iphone|ipad|ipod/i.test(navigator.userAgent)) {
-      showStatus('请长按图片选择"存储到相册"', 'info');
-    }
-  } catch (e) {
-    showStatus('保存失败: ' + (e && e.message || e), 'error');
-  }
-}
-
-// dataURL -> Blob (避免用 fetch(data:), 部分浏览器对 data URL 的 fetch 有限制)
-function dataUrlToBlob(dataUrl) {
-  const [meta, b64] = dataUrl.split(',');
-  const mime = (meta.match(/data:(.*?);base64/) || [])[1] || 'image/png';
-  const bin = atob(b64);
-  const len = bin.length;
-  const u8 = new Uint8Array(len);
-  for (let i = 0; i < len; i++) u8[i] = bin.charCodeAt(i);
-  return new Blob([u8], { type: mime });
+  
+  fetch(audioUrl)
+    .then(response => response.blob())
+    .then(blob => {
+      const file = new File([blob], filename, { type: 'audio/mpeg' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({
+          title: `${displayName} - 版本${label}`,
+          files: [file]
+        }).catch(() => {
+          showStatus('分享已取消', 'info');
+        });
+      } else {
+        showStatus('您的浏览器不支持直接分享音频，请先下载再分享', 'info');
+      }
+    })
+    .catch(() => {
+      showStatus('音频加载失败，请先播放再尝试分享', 'error');
+    });
 }
 
 function copyToClipboard(text) {
@@ -1321,10 +1336,9 @@ function fallbackCopy(text) {
 
 function displayResults(results, versions) {
   const panel = document.getElementById('resultPanel');
-  // Define displayName early so it can be used throughout the function
-  const displayName = S.songName || S.topic || '灵犀King';
   // Hide step3 card to avoid duplicate UI
   document.getElementById('step3Card').classList.add('hidden');
+  const displayName = S.songName || S.topic || '灵犀King';
   let hasSuccess = false, hasError = false;
   
   results.forEach((r, i) => {
@@ -1348,12 +1362,12 @@ function displayResults(results, versions) {
       hasSuccess = true;
       audio.style.display = '';
       download.style.display = '';
+      const shareBtn = document.getElementById(`shareBtn${r.label}`);
+      if (shareBtn) shareBtn.style.display = '';
       label.textContent = `版本 ${r.label}`;
       audio.src = r.url;
       download.href = r.url;
       download.download = `${displayName}_V${r.label}.mp3`;
-      const shareBtn = document.getElementById(`shareBtn${r.label}`);
-      if (shareBtn) shareBtn.style.display = '';
     }
   });
   
@@ -1391,18 +1405,91 @@ async function retryQuery(taskId, label) {
     audio.src = result.url;
     download.href = result.url;
     download.download = `${S.songName || S.topic || '灵犀King'}_V${result.label}.mp3`;
-    const shareBtn = document.getElementById(`shareBtn${result.label}`);
-    if (shareBtn) shareBtn.style.display = '';
     // Remove retry button
     const retryBtn = audio.parentElement.querySelector('button');
     if (retryBtn) retryBtn.remove();
-    // [恢复机制] 单版本重新查询成功后写回 session
-    updateMusicSession({ results: { [result.label]: result } });
     showStatus(`版本${label}已生成！`, 'success');
   } catch (err) {
     showStatus(`版本${label}仍在生成中，请稍后再试`, 'info');
   }
 }
+
+// ============ 后台切换恢复机制 ============
+(function() {
+  // 页面可见性变化时，切回来自动恢复查询
+  document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) {
+      // 页面重新可见，检查是否有未完成的生成任务
+      try {
+        const pending = localStorage.getItem('aiwrite_pending_tasks');
+        if (!pending) return;
+        const tasks = JSON.parse(pending);
+        if (!tasks || !tasks.length) return;
+        
+        // 如果当前没有在生成中，自动恢复查询
+        const btn = document.getElementById('genSongBtn');
+        if (btn && btn.disabled) return; // 正在生成中，不需要恢复
+        
+        showStatus('检测到未完成的生成任务，正在查询结果...', 'info');
+        
+        // 确保在结果页面
+        if (!document.getElementById('resultPanel').classList.contains('show')) {
+          const panel = document.getElementById('resultPanel');
+          document.getElementById('step3Card').classList.add('hidden');
+          // 初始化结果卡片
+          let html = '<div id="songTitleDisplay" style="grid-column:1/-1;text-align:center;display:none"><span style="font-size:18px;font-weight:bold"></span></div>';
+          tasks.forEach(t => {
+            html += `<div class="result-card" id="resultCard${t.label}">
+              <div class="label">版本 ${t.label}</div>
+              <audio id="audio${t.label}" controls style="display:none"></audio>
+              <a class="download-btn" id="download${t.label}" style="display:none">下载MP3</a>
+              <div style="margin-top:8px">
+                <button id="shareBtn${t.label}" class="download-btn" style="display:none" onclick="showSharePanel(${t.label})">📤 分享</button>
+              </div>
+            </div>`;
+          });
+          panel.innerHTML = html;
+          panel.classList.add('show');
+        }
+        
+        // 逐个查询结果
+        const results = [];
+        const displayName = S.songName || S.topic || '灵犀King';
+        let queryCount = 0;
+        
+        function queryNext() {
+          if (queryCount >= tasks.length) {
+            // 全部查询完成
+            localStorage.removeItem('aiwrite_pending_tasks');
+            const successCount = results.filter(r => !r.error).length;
+            const errorCount = results.filter(r => r.error).length;
+            if (successCount > 0) showStatus('歌曲已生成，点击播放', 'success');
+            if (errorCount > 0) showStatus('部分歌曲仍在生成中，点"重新查询"获取结果', 'info');
+            displayResults(results);
+            return;
+          }
+          
+          const t = tasks[queryCount];
+          pollTask(t.taskId, t.label, () => {})
+            .then(result => {
+              results.push(result);
+              queryCount++;
+              queryNext();
+            })
+            .catch(() => {
+              results.push({ label: t.label, taskId: t.taskId, error: true });
+              queryCount++;
+              queryNext();
+            });
+        }
+        
+        queryNext();
+      } catch(e) {
+        console.warn('Auto-resume error:', e);
+      }
+    }
+  });
+})();
 
 // ============ UTILS ============
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
@@ -1436,156 +1523,6 @@ function hexToBlob(hex) {
 
 // ============ INIT ============
 showStep(1);
-
-// ============ MUSIC SESSION AUTO-RECOVERY ============
-// 页面加载完后, 如果 localStorage 里有未完成的音乐生成任务,
-// 自动恢复到 step3 + 结果面板, 并对 pending 任务重新发起轮询.
-// 这样用户切 App / 刷新 / WebView 被回收后回来不需要重新生成.
-(async function resumeMusicSession() {
-  const session = loadMusicSession();
-  if (!session || !Array.isArray(session.tasks) || !session.tasks.length) return;
-
-  // 恢复歌曲元信息
-  const m = session.meta || {};
-  if (m.topic) S.topic = m.topic;
-  if (m.songName !== undefined) S.songName = m.songName;
-  if (m.lyrics) S.lyrics = m.lyrics;
-  if (m.style) S.style = m.style;
-  if (m.stylePrompt) S.stylePrompt = m.stylePrompt;
-  if (m.voice) S.voice = m.voice;
-
-  // 同步 UI
-  const topicEl = document.getElementById('topicInput');
-  if (topicEl && m.topic) topicEl.value = m.topic;
-  const lyricsEl = document.getElementById('lyricsEditor');
-  if (lyricsEl && m.lyrics) lyricsEl.value = m.lyrics;
-  const songNameEl = document.getElementById('songNameInput');
-  if (songNameEl) songNameEl.value = m.songName || '';
-  document.querySelectorAll('.style-tag').forEach(t => {
-    t.classList.toggle('active', t.dataset.style === S.style);
-  });
-  document.querySelectorAll('.voice-btn').forEach(b => {
-    b.classList.toggle('active', b.dataset.voice === S.voice);
-  });
-
-  // 跳到 step3 并展示结果区域骨架
-  showStep(3);
-  document.getElementById('step3Card').classList.add('hidden');
-
-  const savedResults = session.results || {};
-  const labels = session.tasks.map(t => t.label);
-
-  // 先把已知结果 (直链或已完成轮询) 渲染出来
-  const initialResults = session.tasks.map(t => {
-    if (t.direct && t.url) return { label: t.label, url: t.url };
-    if (savedResults[t.label]) return savedResults[t.label];
-    return { label: t.label, taskId: t.task_id, error: true };
-  });
-  displayResults(initialResults);
-
-  // 检查是否还有 pending 任务需要继续轮询
-  const pending = session.tasks.filter(t => !t.direct && !(savedResults[t.label] && savedResults[t.label].url));
-  if (pending.length === 0) return;
-
-  showStatus('🎵 检测到未完成的生成任务, 正在自动恢复...', 'info');
-  showLoading('🎵 正在恢复音乐生成...');
-  updateProgress(40, '云端任务仍在生成中, 继续查询...');
-
-  let recovered = 0, stillPending = 0;
-  for (const task of pending) {
-    try {
-      const r = await pollTask(task.task_id, task.label, (pct) => {
-        updateProgress(40 + pct * 0.5, `版本${task.label}制作中... ${Math.round(pct)}%`);
-      });
-      // 局部更新 DOM
-      const audio = document.getElementById(`audio${r.label}`);
-      if (audio) {
-        const download = document.getElementById(`download${r.label}`);
-        const labelEl = audio.parentElement.querySelector('.label');
-        audio.style.display = '';
-        if (download) {
-          download.style.display = '';
-          download.href = r.url;
-          download.download = `${S.songName || S.topic || '灵犀King'}_V${r.label}.mp3`;
-        }
-        if (labelEl) labelEl.textContent = `版本 ${r.label}`;
-        audio.src = r.url;
-        const shareBtn = document.getElementById(`shareBtn${r.label}`);
-        if (shareBtn) shareBtn.style.display = '';
-        const retryBtn = audio.parentElement.querySelector('button');
-        if (retryBtn) retryBtn.remove();
-      }
-      updateMusicSession({ results: { [r.label]: r } });
-      recovered++;
-    } catch (e) {
-      stillPending++;
-      // 仍未完成 - 保留 retry 按钮让用户稍后再点
-      console.warn('recover poll failed', task.label, e && e.message);
-    }
-  }
-
-  hideLoading();
-  if (recovered > 0) {
-    showStatus(`已恢复 ${recovered} 首歌曲结果`, 'success');
-  }
-  if (stillPending > 0) {
-    setTimeout(() => showStatus(`${stillPending} 首仍在云端生成中, 稍后点"重新查询"`, 'info'), 3200);
-  }
-  // 两个版本都还没拿到结果时, session 暂不清理; 用户可继续点 retry
-  const allDone = session.tasks.every(t => t.direct || (savedResults[t.label] && savedResults[t.label].url));
-  if (allDone && stillPending === 0) {
-    // 保留 session 30 分钟, 期间刷新仍可看到结果; 用户点"写一首新歌"时清理
-  }
-})();
-</script>
-
-<!-- 分享歌词底部面板 -->
-<div id="shareSheet" class="hidden fixed inset-0 z-[60] flex items-end justify-center" onclick="if(event.target===this)this.classList.add('hidden')">
-  <div class="absolute inset-0 bg-black/50"></div>
-  <div class="relative w-full max-w-md bg-[#1a1035] rounded-t-2xl p-5 pb-7" style="animation: slideUp .25s ease">
-    <div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4"></div>
-    <h3 class="text-white text-lg font-semibold mb-4 text-center">分享歌词</h3>
-    <button onclick="shareLyrics()" class="w-full py-3 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-medium mb-2">🎨 生成歌词海报</button>
-    <button onclick="copyLyrics()" class="w-full py-3 rounded-xl bg-white/10 text-white font-medium mb-2">📝 复制歌词文字</button>
-    <button onclick="document.getElementById('shareSheet').classList.add('hidden')" class="w-full py-3 rounded-xl text-white/60 text-sm mt-1">取消</button>
-  </div>
-</div>
-
-<!-- 歌词海报弹窗 (iOS Safari 兼容: 底部抽屉式, 避免 100vh 与工具栏遮挡) -->
-<div id="posterModal" class="hidden fixed inset-0 z-[70] flex items-end sm:items-center justify-center" onclick="if(event.target===this)closePosterModal()" style="padding:0;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)">
-  <div class="absolute inset-0" style="background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)"></div>
-  <div class="relative w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl flex flex-col" style="background:linear-gradient(160deg,#1a1035,#0f0a1f);max-height:-webkit-fill-available;max-height:92vh;padding:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom));box-shadow:0 -8px 32px rgba(0,0,0,0.5)" onclick="event.stopPropagation()">
-    <div class="flex items-center justify-between mb-3 flex-shrink-0">
-      <div style="width:28px"></div>
-      <h3 class="text-white text-lg font-semibold text-center">歌词海报</h3>
-      <button onclick="closePosterModal()" aria-label="关闭" style="width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.1);color:#fff;border:none;font-size:16px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center">×</button>
-    </div>
-    <div style="flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;justify-content:center">
-      <img id="posterImg" alt="歌词海报" style="display:block;width:auto;max-width:100%;max-height:65vh;height:auto;margin:0 auto;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.4)"/>
-    </div>
-    <div class="flex gap-2 mt-3 flex-shrink-0" style="padding-top:8px;border-top:1px solid rgba(255,255,255,0.08)">
-      <button onclick="savePoster()" class="flex-1" style="padding:14px;border-radius:12px;color:#fff;font-weight:600;font-size:15px;border:none;cursor:pointer;background:linear-gradient(135deg,#7c3aed,#d946ef);box-shadow:0 2px 10px rgba(124,58,237,0.35)">💾 保存图片</button>
-      <button onclick="closePosterModal()" class="flex-1" style="padding:14px;border-radius:12px;color:#fff;font-size:15px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);cursor:pointer">关闭</button>
-    </div>
-    <div id="posterHint" style="display:none;text-align:center;font-size:12px;color:rgba(255,255,255,0.5);margin-top:8px;flex-shrink:0">iOS 用户可长按上方图片选择"存储到相册"</div>
-  </div>
-</div>
-
-<!-- 音频分享弹窗 -->
-<div id="audioShareModal" class="hidden fixed inset-0 z-[70] flex items-center justify-center p-4" onclick="if(event.target===this)closeAudioShareModal()">
-  <div class="absolute inset-0 bg-black/70"></div>
-  <div class="relative w-full max-w-sm rounded-2xl p-5 text-center" style="background:linear-gradient(160deg,#1a1035,#0f0a1f)">
-    <div id="audioShareIcon" class="text-4xl mb-2">🎵</div>
-    <h3 id="audioShareTitle" class="text-white text-lg font-semibold mb-2">分享歌曲</h3>
-    <p id="audioShareText" class="text-white/70 text-sm mb-4">正在准备音频文件...</p>
-    <button onclick="closeAudioShareModal()" class="w-full py-3 rounded-xl bg-white/10 text-white">取消</button>
-  </div>
-</div>
-
-<script>
-function closeAudioShareModal() {
-  document.getElementById('audioShareModal').classList.add('hidden');
-}
 </script>
 </body>
 </html>
