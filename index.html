@@ -528,8 +528,16 @@ function findDeepKey(obj, key) {
 }
 
 // 从 Mureka song detail 中尽力找出可播放的音频 URL
+// 官方真实结构 (2026-08):
+//   { status:"succeeded", choices:[{ url:"...mp3", flac_url:"...flac", duration:143630, ... }] }
 function extractMurekaAudioUrl(data) {
   if (!data) return null;
+  // 优先官方结构 choices[0].url
+  if (Array.isArray(data.choices) && data.choices[0]) {
+    const c = data.choices[0];
+    const u = c.url || c.audio_url || c.audio || c.flac_url;
+    if (typeof u === 'string' && u.startsWith('http')) return u;
+  }
   // 常见字段: audio_url / audio / url / src / stream_url
   const direct = findDeepKey(data, 'audio_url') || findDeepKey(data, 'audio')
               || findDeepKey(data, 'stream_url') || findDeepKey(data, 'url');
@@ -975,7 +983,7 @@ async function pollTask(taskId, label, onProgress) {
 
     let resp;
     try {
-      resp = await murekaFetch(`/v1/song/${taskId}`, {
+      resp = await murekaFetch(`/v1/song/query/${taskId}`, {
         headers: { 'Authorization': `Bearer ${S.apiKey}` }
       });
     } catch (e) {
@@ -996,8 +1004,8 @@ async function pollTask(taskId, label, onProgress) {
     const status = (data.status || (data.data && data.data.status) || '').toString().toLowerCase();
     console.log(`[Mureka Poll ${label}] attempt=${attempts} status=${status}`);
 
-    // 完成: 提取音频 URL
-    if (status === 'completed' || status === 'success' || status === 'done') {
+    // 完成: 提取音频 URL (Mureka 官方终态是 "succeeded", 兼容其他写法)
+    if (status === 'succeeded' || status === 'completed' || status === 'success' || status === 'done') {
       const url = extractMurekaAudioUrl(data);
       if (url) return { label, url };
       // completed 但没 URL — 再等一轮, 可能是接口最终一致性
