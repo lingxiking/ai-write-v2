@@ -146,7 +146,7 @@ textarea.input-field{min-height:200px;resize:vertical;font-family:inherit;line-h
 <!-- Settings Toggle -->
 <div class="settings-toggle" onclick="toggleSettings()">⚙️</div>
 <div class="settings-panel" id="settingsPanel">
-  <label>MiniMax API Key</label>
+  <label>Mureka API Key</label>
   <input class="input-field" id="apiKey" type="password" placeholder="sk-api-..." />
   <label>DeepSeek API Key（歌词生成）</label>
   <input class="input-field" id="dsApiKey" type="password" placeholder="sk-..." />
@@ -321,7 +321,7 @@ textarea.input-field{min-height:200px;resize:vertical;font-family:inherit;line-h
 <script>
 // ============ STATE ============
 const S = {
-  apiKey: localStorage.getItem('mm_api_key') || 'sk-api-DV-HXtUu6SX9CcUmo38pzKmKTCfXYrfYAo6d7qDc2FfpqOJpFsG0PPxra691-MFZ76PTCqkAT1R9WfFimXBzOwZjKtPyB3owzCea8RcZ0_KyeqU1Tfwit04',
+  apiKey: localStorage.getItem('mureka_api_key') || 'op_7c8s9s0x5do0q4663kxn7i6hqhbqhs199',
   dsApiKey: localStorage.getItem('ds_api_key') || 'sk-b203526f7b8c4ca0afd2e159271f97a8',
   style: 'pop',
   stylePrompt: '流行,优美旋律,抒情,朗朗上口',
@@ -421,7 +421,9 @@ function toggleSettings() {
 function saveSettings() {
   S.apiKey = document.getElementById('apiKey').value;
   S.dsApiKey = document.getElementById('dsApiKey').value;
-  localStorage.setItem('mm_api_key', S.apiKey);
+  localStorage.setItem('mureka_api_key', S.apiKey);
+  // 清理已停服的 MiniMax Key 缓存
+  try { localStorage.removeItem('mm_api_key'); } catch(e) {}
   localStorage.setItem('ds_api_key', S.dsApiKey);
   showStatus('设置已保存', 'success');
   setTimeout(() => document.getElementById('settingsPanel').classList.remove('show'), 1000);
@@ -505,9 +507,61 @@ const API_BASE = ''; // Same origin on Netlify
 const isLocal = true;
 const LYRICS_API = 'https://api.deepseek.com/chat/completions';
 const MUSIC_API = '';
-// CORS proxy for MiniMax if needed
+// Mureka music generation
+const MUREKA_BASE = 'https://api.mureka.cn';
+// CORS proxy for Mureka / DeepSeek if needed
 const CORS_PROXY = 'https://corsproxy.io/?';
 const CORS_PROXY2 = 'https://api.allorigins.win/raw?url=';
+
+// 递归查找对象中指定 key (用于 Mureka 返回结构可能嵌套)
+function findDeepKey(obj, key) {
+  if (!obj || typeof obj !== 'object') return null;
+  if (obj[key] !== undefined && obj[key] !== null && obj[key] !== '') return obj[key];
+  for (const k in obj) {
+    const v = obj[k];
+    if (v && typeof v === 'object') {
+      const f = findDeepKey(v, key);
+      if (f !== null) return f;
+    }
+  }
+  return null;
+}
+
+// 从 Mureka song detail 中尽力找出可播放的音频 URL
+function extractMurekaAudioUrl(data) {
+  if (!data) return null;
+  // 常见字段: audio_url / audio / url / src / stream_url
+  const direct = findDeepKey(data, 'audio_url') || findDeepKey(data, 'audio')
+              || findDeepKey(data, 'stream_url') || findDeepKey(data, 'url');
+  if (typeof direct === 'string' && direct.startsWith('http')) return direct;
+  // clips / songs 数组里取第一个
+  const arr = data.clips || data.songs || data.tracks || (Array.isArray(data) ? data : null);
+  if (Array.isArray(arr) && arr[0]) {
+    return extractMurekaAudioUrl(arr[0]);
+  }
+  return null;
+}
+
+// 统一的 Mureka fetch (直连 + CORS 代理 fallback)
+async function murekaFetch(path, options) {
+  const url = MUREKA_BASE + path;
+  let lastErr;
+  // 直连
+  try {
+    const r = await fetch(url, options);
+    if (r.ok || r.status < 500) return r;
+    lastErr = new Error('HTTP ' + r.status);
+  } catch (e) { lastErr = e; }
+  // CORS proxy 1
+  try {
+    const r = await fetch(CORS_PROXY + encodeURIComponent(url), options);
+    if (r.ok || r.status < 500) return r;
+    lastErr = new Error('HTTP ' + r.status);
+  } catch (e) { lastErr = e; }
+  // CORS proxy 2
+  const r2 = await fetch(CORS_PROXY2 + encodeURIComponent(url), options);
+  return r2;
+}
 
 // ============ LYRICS GENERATION (via Netlify Function or Direct) ============
 async function generateLyrics() {
@@ -725,7 +779,7 @@ async function generateSongs() {
   };
   const voiceDesc = styleVoice[S.style] || styleVoice.pop;
   
-  // Style-specific arrangement hints (Chinese for better MiniMax understanding)
+  // Style-specific arrangement hints (Chinese for better Mureka understanding)
   const styleArrangement = {
     pop: ['华语流行编曲,90年代经典风格,温暖深情,旋律朗朗上口,副歌记忆点强,编曲精致', '流行抒情编曲,层次递进,弦乐铺底,副歌情感饱满,旋律简单好听,浪漫温暖'],
     rock: ['旋律摇滚编曲,电吉他riff驱动,主歌克制铺垫副歌爆发,旋律抓耳,深情沙哑,吉他solo激昂,励志热血,副歌朗朗上口有力量', '港式摇滚编曲,经典吉他solo,前奏旋律引入,副歌激昂热血,鼓点有力但不压旋律,情怀感,旋律激昂动听'],
@@ -767,95 +821,69 @@ async function generateSongs() {
       updateProgress(10 + i * 5, `提交版本${versions[i].name}...`);
       
       if (isLocal) {
-        // Direct MiniMax call, fallback to CORS proxy if blocked
-        const miniMaxBody = JSON.stringify({
-          model: 'music-3.0-free',
-          prompt: versions[i].prompt,
+        // ===== Mureka: POST /v1/song/generate =====
+        // Mureka prompt 偏好英文短描述, 这里从中文 stylePrompt + voiceDesc + arr 中提炼一段
+        const gender = S.voice === 'female' ? 'female' : 'male';
+        const murekaBody = JSON.stringify({
           lyrics: S.lyrics,
-          audio_setting: { sample_rate: 44100, bitrate: 256000, format: 'mp3' },
-          output_format: 'url'
+          model: 'auto',
+          prompt: versions[i].prompt,
+          gender: gender,
+          n: 1
         });
         const headers = {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${S.apiKey}`
         };
-        
+
         let resp = null;
         const MAX_RETRIES = 2;
         for (let retry = 0; retry <= MAX_RETRIES; retry++) {
           if (retry > 0) {
-            console.log(`[MiniMax] Retry ${retry}/${MAX_RETRIES} for version ${versions[i].name}...`);
+            console.log(`[Mureka] Retry ${retry}/${MAX_RETRIES} for version ${versions[i].name}...`);
             updateProgress(10 + i * 5, `版本${versions[i].name} 重试中(${retry}/${MAX_RETRIES})...`);
-            await new Promise(r => setTimeout(r, 3000 * retry)); // wait 3s, then 6s
+            await new Promise(r => setTimeout(r, 3000 * retry));
           }
           try {
-            resp = await fetch('https://api.minimaxi.com/v1/music_generation', {
-              method: 'POST', headers: headers, body: miniMaxBody
+            resp = await murekaFetch('/v1/song/generate', {
+              method: 'POST', headers: headers, body: murekaBody
             });
-          } catch(corsErr) {
-            // CORS blocked, try proxy chain
-            try {
-              resp = await fetch(CORS_PROXY + 'https://api.minimaxi.com/v1/music_generation', {
-                method: 'POST', headers: headers, body: miniMaxBody
-              });
-            } catch(proxyErr) {
-              try {
-                resp = await fetch(CORS_PROXY2 + 'https://api.minimaxi.com/v1/music_generation', {
-                  method: 'POST', headers: headers, body: miniMaxBody
-                });
-              } catch(proxyErr2) {
-                console.error('[MiniMax] Proxy2 error:', proxyErr2);
-                resp = null;
-                continue;
-              }
-            }
+          } catch (e) {
+            console.error('[Mureka] network error', e);
+            resp = null;
+            continue;
           }
-          // If response is OK or not a server error (5xx), break retry loop
           if (resp && (resp.ok || resp.status < 500)) break;
         }
-        
+
         if (!resp) {
-          throw new Error(`MiniMax连接失败: 网络请求${MAX_RETRIES + 1}次均失败，请检查网络后重试`);
+          throw new Error(`Mureka连接失败: 网络请求${MAX_RETRIES + 1}次均失败，请检查网络后重试`);
         }
-        
         if (!resp.ok) {
           const errText = await resp.text().catch(() => '');
-          throw new Error(`MiniMax API错误 ${resp.status}: ${errText.substring(0, 150)}`);
+          throw new Error(`Mureka API错误 ${resp.status}: ${errText.substring(0, 150)}`);
         }
-        
+
         const rawText = await resp.text();
-        console.log('[MiniMax Raw Response]', rawText.substring(0, 500));
-        
+        console.log('[Mureka Submit Response]', rawText.substring(0, 500));
         let data;
         try { data = JSON.parse(rawText); } catch(pe) {
-          throw new Error('MiniMax响应非JSON: ' + rawText.substring(0, 200));
+          throw new Error('Mureka响应非JSON: ' + rawText.substring(0, 200));
         }
-        
-        // Deep search for task_id and url in response
-        let url = null, taskId = null;
-        
-        // Helper: recursively find key in object
-        function findKey(obj, key) {
-          if (!obj || typeof obj !== 'object') return null;
-          if (obj[key] !== undefined && obj[key] !== null && obj[key] !== '') return obj[key];
-          for (var k in obj) {
-            var found = findKey(obj[k], key);
-            if (found !== null) return found;
+
+        // Mureka 返回 { id, status:'preparing', ... } 或 { data: { id } }
+        let songId = data.id || (data.data && (data.data.id || data.data.task_id))
+                   || findDeepKey(data, 'id');
+        if (!songId) {
+          // 某些账号直接返回了音频 URL
+          const directUrl = extractMurekaAudioUrl(data);
+          if (directUrl) {
+            tasks.push({ direct: true, url: directUrl, label: versions[i].name });
+            continue;
           }
-          return null;
+          throw new Error('Mureka返回异常(无 id): ' + rawText.substring(0, 300));
         }
-        
-        taskId = findKey(data, 'task_id');
-        url = findKey(data, 'audio_url') || findKey(data, 'audio') || findKey(data, 'url');
-        
-        if (url) {
-          tasks.push({ direct: true, url: url, label: versions[i].name });
-        } else if (taskId) {
-          tasks.push({ direct: false, task_id: taskId, label: versions[i].name });
-        } else {
-          throw new Error('MiniMax返回异常(无task_id/URL): ' + rawText.substring(0, 300));
-        }
-        
+        tasks.push({ direct: false, task_id: String(songId), label: versions[i].name });
       } else {
         // Via Netlify Function proxy
         const resp = await fetch('/api/music', {
@@ -938,48 +966,54 @@ async function generateSongs() {
 
 async function pollTask(taskId, label, onProgress) {
   let attempts = 0;
-  const maxAttempts = 60;
-  
+  const maxAttempts = 80; // 80 * 3s = 240s 上限
+
   while (attempts < maxAttempts) {
     await sleep(3000);
     attempts++;
     onProgress(Math.min(90, (attempts / maxAttempts) * 100));
-    
+
     let resp;
-    if (isLocal) {
-      try {
-        resp = await fetch(`https://api.minimaxi.com/v1/query/music_generation?task_id=${taskId}`, {
-          headers: { 'Authorization': `Bearer ${S.apiKey}` }
-        });
-      } catch(e) {
-        resp = await fetch(CORS_PROXY + `https://api.minimaxi.com/v1/query/music_generation?task_id=${taskId}`, {
-          headers: { 'Authorization': `Bearer ${S.apiKey}` }
-        });
-      }
-    }
-    
-    if (!resp.ok) {
+    try {
+      resp = await murekaFetch(`/v1/song/${taskId}`, {
+        headers: { 'Authorization': `Bearer ${S.apiKey}` }
+      });
+    } catch (e) {
+      console.warn('[Mureka] poll network error', e);
       if (attempts > 5) throw new Error(`查询版本${label}失败`);
       continue;
     }
-    
-    const data = await resp.json();
-    
-    // Check for URL in various response formats
-    let url = null;
-    if (data.data && data.data.audio_url) url = data.data.audio_url;
-    if (data.data && data.data.url) url = data.data.url;
-    if (!url && data.data && Array.isArray(data.data) && data.data[0]) url = data.data[0].url || data.data[0].audio_url;
-    if (!url) url = data.url || data.audio_url;
-    
-    if (url) return { label, url };
-    
-    if (data.status === 'failed' || data.status === 'error' || (data.base_resp && data.base_resp.status_code !== 0)) {
-      const errMsg = (data.base_resp && data.base_resp.status_msg) || '未知错误';
+
+    if (!resp.ok) {
+      if (attempts > 5) throw new Error(`查询版本${label}失败: HTTP ${resp.status}`);
+      continue;
+    }
+
+    const data = await resp.json().catch(() => null);
+    if (!data) continue;
+
+    // 状态可能在根或 data 内
+    const status = (data.status || (data.data && data.data.status) || '').toString().toLowerCase();
+    console.log(`[Mureka Poll ${label}] attempt=${attempts} status=${status}`);
+
+    // 完成: 提取音频 URL
+    if (status === 'completed' || status === 'success' || status === 'done') {
+      const url = extractMurekaAudioUrl(data);
+      if (url) return { label, url };
+      // completed 但没 URL — 再等一轮, 可能是接口最终一致性
+      if (attempts > 8) throw new Error(`版本${label}已完成但未返回音频地址`);
+      continue;
+    }
+    // 失败
+    if (status === 'failed' || status === 'error') {
+      const errMsg = data.message || data.error_message
+                  || (data.data && (data.data.message || data.data.error_message))
+                  || '未知错误';
       throw new Error(`版本${label}生成失败: ${errMsg}`);
     }
+    // 其余状态 (preparing / processing / queued / pending) 继续轮询
   }
-  
+
   throw new Error(`版本${label}生成超时，请重试`);
 }
 
